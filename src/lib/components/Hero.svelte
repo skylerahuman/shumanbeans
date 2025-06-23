@@ -51,6 +51,15 @@
 <section class="relative min-h-screen flex flex-col items-center justify-center px-6 starfield">
   <!-- Hero Content -->
   <div class="text-center max-w-4xl mx-auto mb-12 animate-fade-in">
+    <!-- KairOS Logo -->
+    <div class="mb-8">
+      <img 
+        src="/logo.png" 
+        alt="KairOS Browser Logo" 
+        class="mx-auto h-24 md:h-32 w-auto drop-shadow-lg"
+      />
+    </div>
+    
     <h1 class="text-5xl md:text-7xl font-extrabold mb-6 text-kairos-silver">
       One Prompt. <span class="text-kairos-trust-blue">Every Purpose.</span>
     </h1>
