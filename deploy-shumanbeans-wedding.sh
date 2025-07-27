@@ -1,10 +1,10 @@
 #!/bin/bash
-# KairOS Site Deployment Script
+# Shumanbeans Wedding Website Deployment Script
 # Run this on your Digital Ocean droplet
 
 set -e  # Exit on any error
 
-echo "🚀 Starting KairOS site deployment..."
+echo "🚀 Starting Shumanbeans wedding website deployment..."
 
 # Update system
 echo "📦 Updating system packages..."
@@ -28,15 +28,15 @@ echo "📁 Setting up application directory..."
 mkdir -p /var/www
 cd /var/www
 
-# Clone the KairOS repository
-echo "📥 Cloning KairOS repository..."
-if [ -d "kairos-site" ]; then
+# Clone the Shumanbeans wedding website repository
+echo "📥 Cloning Shumanbeans wedding website repository..."
+if [ -d "shumanbeans-wedding" ]; then
     echo "Directory exists, updating..."
-    cd kairos-site
-    git pull origin master
+    cd shumanbeans-wedding
+    git pull origin main
 else
-    git clone https://github.com/skylerahuman/kairos-site.git
-    cd kairos-site
+    git clone https://github.com/skylerahuman/shumanbeans-wedding.git
+    cd shumanbeans-wedding
 fi
 
 # Install dependencies
@@ -49,8 +49,8 @@ npm run build
 
 # Start application with PM2
 echo "🚀 Starting application with PM2..."
-pm2 delete kairos-site 2>/dev/null || true  # Delete if exists
-pm2 start server.js --name "kairos-site"
+pm2 delete shumanbeans-wedding 2>/dev/null || true  # Delete if exists
+pm2 start server.js --name "shumanbeans-wedding"
 pm2 startup
 pm2 save
 
@@ -61,10 +61,10 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server;
     
-    root /var/www/kairos-site;
+    root /var/www/shumanbeans-wedding;
     index index.html index.htm index.nginx-debian.html;
     
-    server_name _;
+    server_name shumanbeans.com www.shumanbeans.com;
     
     location / {
         proxy_pass http://localhost:3000;
@@ -107,16 +107,18 @@ pm2 status
 echo "🎉 Deployment completed successfully!"
 echo ""
 echo "📋 Deployment Summary:"
-echo "✅ KairOS site is now running on this server"
-echo "✅ Nginx is configured as reverse proxy"
+echo "✅ Shumanbeans wedding website is now running on this server"
+echo "✅ Nginx is configured as reverse proxy for shumanbeans.com"
 echo "✅ PM2 is managing the Node.js application"
 echo "✅ Firewall is configured"
 echo ""
-echo "🌐 Your site should be accessible at: http://$(curl -s ifconfig.me)"
+echo "🌐 Your wedding website should be accessible at:"
+echo "    - http://$(curl -s ifconfig.me)"
+echo "    - http://shumanbeans.com (once DNS is configured)"
 echo "💰 Server cost: $4/month"
 echo ""
 echo "🔧 Management commands:"
 echo "  - Check app status: pm2 status"
-echo "  - Restart app: pm2 restart kairos-site"
-echo "  - View app logs: pm2 logs kairos-site"
-echo "  - Check nginx: systemctl status nginx" 
+echo "  - Restart app: pm2 restart shumanbeans-wedding"
+echo "  - View app logs: pm2 logs shumanbeans-wedding"
+echo "  - Check nginx: systemctl status nginx"
