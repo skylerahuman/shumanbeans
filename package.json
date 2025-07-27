@@ -1,11 +1,11 @@
 {
-  "name": "shumanbeans-wedding",
+  "name": "shumanbeans",
   "version": "1.0.0",
   "description": "Wedding website for the Shumanbeans - sharing our love story and celebration details",
   "homepage": "https://shumanbeans.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/skylerahuman/shumanbeans-wedding.git"
+    "url": "https://github.com/skylerahuman/shumanbeans.git"
   },
   "private": true,
   "scripts": {

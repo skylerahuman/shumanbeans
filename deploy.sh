@@ -30,13 +30,13 @@ cd /var/www
 
 # Clone the Shumanbeans wedding website repository
 echo "📥 Cloning Shumanbeans wedding website repository..."
-if [ -d "shumanbeans-wedding" ]; then
+if [ -d "shumanbeans" ]; then
     echo "Directory exists, updating..."
-    cd shumanbeans-wedding
+    cd shumanbeans
     git pull origin main
 else
-    git clone https://github.com/skylerahuman/shumanbeans-wedding.git
-    cd shumanbeans-wedding
+    git clone https://github.com/skylerahuman/shumanbeans.git
+    cd shumanbeans
 fi
 
 # Install dependencies
@@ -49,8 +49,8 @@ npm run build
 
 # Start application with PM2
 echo "🚀 Starting application with PM2..."
-pm2 delete shumanbeans-wedding 2>/dev/null || true  # Delete if exists
-pm2 start server.js --name "shumanbeans-wedding"
+pm2 delete shumanbeans 2>/dev/null || true  # Delete if exists
+pm2 start server.js --name "shumanbeans"
 pm2 startup
 pm2 save
 
@@ -61,7 +61,7 @@ server {
     listen 80 default_server;
     listen [::]:80 default_server;
     
-    root /var/www/shumanbeans-wedding;
+    root /var/www/shumanbeans;
     index index.html index.htm index.nginx-debian.html;
     
     server_name shumanbeans.com www.shumanbeans.com;
@@ -119,6 +119,6 @@ echo "💰 Server cost: $4/month"
 echo ""
 echo "🔧 Management commands:"
 echo "  - Check app status: pm2 status"
-echo "  - Restart app: pm2 restart shumanbeans-wedding"
-echo "  - View app logs: pm2 logs shumanbeans-wedding"
+echo "  - Restart app: pm2 restart shumanbeans"
+echo "  - View app logs: pm2 logs shumanbeans"
 echo "  - Check nginx: systemctl status nginx"

@@ -19,7 +19,7 @@ This is the wedding website for shumanbeans.com, built with SvelteKit, TypeScrip
 ## 🏗️ Project Structure
 
 ```
-shumanbeans-wedding/
+shumanbeans/
 ├── src/
 │   ├── routes/
 │   │   ├── +layout.svelte      # Global layout
@@ -33,6 +33,7 @@ shumanbeans-wedding/
 │   └── app.css               # Global styles & Tailwind
 ├── server.js                 # Node.js Express server
 ├── package.json             # Dependencies & scripts
+├── deploy.sh                # Deployment script
 └── tailwind.config.js       # Custom wedding color palette
 ```
 
