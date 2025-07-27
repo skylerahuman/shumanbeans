@@ -1,19 +1,25 @@
 // server.js
 import express from 'express';
+import { createServer } from 'http';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { i as initializeSocketIO } from './.svelte-kit/output/server/chunks/socket.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+const server = createServer(app);
 const PORT = process.env.PORT || 3000;
+
+// Initialize Socket.IO
+initializeSocketIO(server);
 
 // Middleware
 app.use(express.json());
 
 // Serve static files from SvelteKit build output
-app.use(express.static(join(__dirname, 'build')));
+app.use(express.static(join(__dirname, '.svelte-kit/output/client')));
 
 // CORS middleware for development
 app.use((req, res, next) => {
@@ -94,7 +100,7 @@ app.get('/api/health', (req, res) => {
 
 // Catch-all handler for SvelteKit routing
 app.get('*', (req, res) => {
-  res.sendFile(join(__dirname, 'build', 'index.html'));
+  res.sendFile(join(__dirname, '.svelte-kit/output/client', 'index.html'));
 });
 
 // Error handling middleware
@@ -106,8 +112,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 KairOS Server running on http://localhost:${PORT}`);
   console.log(`📡 API available at http://localhost:${PORT}/api/intent`);
   console.log(`🎯 Health check at http://localhost:${PORT}/api/health`);
-}); 
+  console.log(`🌐 Date Poll available at http://localhost:${PORT}/date-poll`);
+});

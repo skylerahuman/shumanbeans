@@ -1,7 +1,6 @@
 <script lang="ts">
-  import Hero from '$lib/components/Hero.svelte';
-  import FeatureCard from '$lib/components/FeatureCard.svelte';
-  import IntentShowcase from '$lib/components/IntentShowcase.svelte';
+  import CoffeeBeanWithBowtie from '$lib/components/CoffeeBeanWithBowtie.svelte';
+  import QRCodeComponent from '$lib/components/QRCodeComponent.svelte';
 </script>
 
 <svelte:head>
@@ -9,8 +8,29 @@
   <meta name="description" content="Join us in celebrating our love story and upcoming wedding. Find all the details, RSVP, and share in our joy at shumanbeans.com." />
 </svelte:head>
 
-<!-- Hero Section -->
-<Hero />
+<!-- New Hero Section -->
+<section class="hero flex flex-col items-center justify-center bg-coffee-light text-coffee-dark min-h-screen">
+  <h1 class="text-4xl md:text-6xl font-bold mb-6 text-center">
+    Welcome to The Shumanbeans Wedding!
+  </h1>
+  <p class="text-lg md:text-xl mb-8 max-w-lg mx-auto text-center">
+    Join us in celebrating our love story and upcoming wedding.
+  </p>
+  <div class="flex flex-col md:flex-row gap-8 items-center">
+    <CoffeeBeanWithBowtie className="w-32 md:w-40" />
+    <QRCodeComponent size={200} />
+  </div>
+
+  <!-- CTA Buttons -->
+  <div class="mt-8 flex flex-col sm:flex-row gap-4 sm:gap-4">
+    <button class="btn-primary text-lg px-8 py-4">
+      RSVP Now
+    </button>
+    <button class="btn-secondary text-lg px-8 py-4">
+      Our Story
+    </button>
+  </div>
+</section>
 
 <!-- Features Section -->
 <section class="py-20 px-6 bg-gradient-to-b from-kairos-charcoal to-kairos-gunmetal">
