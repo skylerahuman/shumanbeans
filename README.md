@@ -1,62 +1,51 @@
-# KairOS Browser Homepage
+# Shumanbeans Wedding Website 💕
 
-> **"One Prompt. Every Purpose."** — The intent-driven browser that guards your attention, honors your focus, and frees you from endless scrolls.
+> **"Two hearts, one journey, endless love."** — Celebrating the love story and upcoming wedding of the Shumanbeans
 
-## 🎯 Project Overview
+## 💒 Project Overview
 
-This is the marketing homepage for KairOS Browser, built with SvelteKit, TypeScript, and TailwindCSS. The design implements a scientifically-informed dark color palette to convey trust, focus, and calm competence.
+This is the wedding website for shumanbeans.com, built with SvelteKit, TypeScript, and TailwindCSS. The design celebrates our love story while providing guests with all the information they need for our special day.
 
 ## ✨ Features
 
+- **Love Story Timeline** - Interactive journey through our relationship
+- **Wedding Details** - Date, venue, schedule, and logistics
+- **RSVP System** - Easy guest response management
+- **Photo Gallery** - Sharing memories leading up to the big day
+- **Gift Registry** - Links to our preferred wedding registry
+- **Responsive Design** - Beautiful on all devices
 - **Modern SvelteKit Architecture** with TypeScript support
-- **Custom Design System** implementing the KairOS color palette
-- **Interactive Components** including animated intent demonstration
-- **Responsive Design** optimized for all device sizes
-- **Node.js API Server** for intent processing simulation
-- **Zero-dependency Frontend** with local-first approach
 
 ## 🏗️ Project Structure
 
 ```
-svelte-kairos-homepage/
+shumanbeans-wedding/
 ├── src/
 │   ├── routes/
 │   │   ├── +layout.svelte      # Global layout
 │   │   └── +page.svelte        # Homepage
 │   ├── lib/
 │   │   └── components/
-│   │       ├── Hero.svelte            # Hero section with starfield
-│   │       ├── FeatureCard.svelte     # Feature cards component
-│   │       └── IntentShowcase.svelte  # Interactive demo
+│   │       ├── Hero.svelte            # Hero section with wedding info
+│   │       ├── FeatureCard.svelte     # Wedding detail cards
+│   │       └── IntentShowcase.svelte  # RSVP or registry showcase
 │   ├── app.html               # HTML template
 │   └── app.css               # Global styles & Tailwind
 ├── server.js                 # Node.js Express server
 ├── package.json             # Dependencies & scripts
-└── tailwind.config.js       # Custom KairOS color palette
+└── tailwind.config.js       # Custom wedding color palette
 ```
 
-## 🎨 Design System
+## 💐 Wedding Information
 
-### Color Palette
+### Save the Date
+- **Date**: [To be announced]
+- **Venue**: [To be announced]
+- **Theme**: Elegant and timeless celebration of love
 
-The design uses a scientifically-informed color palette optimized for trust and focus:
+### Design Aesthetic
 
-| Color | Hex | Purpose |
-|-------|-----|---------|
-| **Charcoal** | `#121416` | Primary background - reduces visual noise |
-| **Gunmetal** | `#1F262E` | Surface panels - provides depth and stability |
-| **Silver** | `#C0C5CE` | Primary text - high readability and calmness |
-| **Cool Gray** | `#8A9199` | Secondary text - soft guidance |
-| **Trust Blue** | `#3B82F6` | Accent color - conveys trust and professionalism |
-| **Responsible Green** | `#22C55E` | Success states - reinforces confidence |
-| **Warm Amber** | `#FBBF24` | Warnings - draws attention without panic |
-| **Coral Red** | `#F87171` | Errors - noticeable but not alarming |
-
-### Typography
-
-- **Font Family**: Inter (Google Fonts)
-- **Weights**: Regular (400), Semibold (600), ExtraBold (800)
-- **Hierarchy**: Clear typographic scale for optimal readability
+The website maintains an elegant design palette suitable for a wedding celebration while preserving the technical excellence of the original codebase.
 
 ## 🚀 Quick Start
 
@@ -98,26 +87,26 @@ The design uses a scientifically-informed color palette optimized for trust and 
 
 ## 🔌 API Endpoints
 
-### POST `/api/intent`
+### POST `/api/rsvp`
 
-Process user intentions and return simulated results.
+Handle RSVP submissions from wedding guests.
 
 **Request:**
 ```json
 {
-  "intent": "Summarize my last 10 Slack messages"
+  "name": "John and Jane Smith",
+  "email": "john.smith@email.com",
+  "attending": true,
+  "guests": 2,
+  "dietary_restrictions": "None"
 }
 ```
 
 **Response:**
 ```json
 {
-  "result": "Summary task completed",
-  "actions": [
-    "Gathering information...",
-    "Processing content...",
-    "Summary generated ✓"
-  ],
+  "result": "RSVP received successfully",
+  "message": "Thank you for your response! We can't wait to celebrate with you.",
   "timestamp": "2025-01-11T10:30:00.000Z",
   "status": "success"
 }
@@ -130,28 +119,28 @@ Health check endpoint for monitoring.
 ## 🎯 Key Components
 
 ### Hero Section
-- Animated starfield background
-- Interactive intent prompt with blinking cursor
-- Primary and secondary CTA buttons
+- Beautiful wedding-themed background
+- Couple names and wedding date prominently displayed
+- RSVP and registry call-to-action buttons
 - Responsive typography scaling
 
-### Feature Cards
-- Hover animations with glowing effects
-- Custom SVG icons for each feature
-- Semantic color coding
-- Grid layout with responsive breakpoints
+### Information Cards
+- Wedding date and time details
+- Venue information with directions
+- Schedule of events
+- Travel and accommodation information
 
-### Intent Showcase
-- Live browser mockup simulation
-- Animated typing effect
-- Real-time results streaming
-- Auto-looping demonstration
+### RSVP System
+- Simple and elegant response form
+- Guest count and dietary restriction capture
+- Confirmation messaging
+- Email notifications
 
-### Trust & Social Proof
-- User avatar representations
-- Rotating testimonials
-- Social proof indicators
-- Biblical reference (Ephesians 5:15-16)
+### Love Story & Gallery
+- Timeline of the relationship
+- Photo carousel of memorable moments
+- Engagement story
+- Wedding party introductions
 
 ## 🔧 Development
 
@@ -168,14 +157,14 @@ Health check endpoint for monitoring.
 
 The design system can be easily customized by modifying:
 
-- **Colors**: `tailwind.config.js` - Update the KairOS color palette
+- **Colors**: `tailwind.config.js` - Update the wedding color palette
 - **Typography**: `src/app.css` - Modify font families and scales
 - **Animations**: `tailwind.config.js` - Add or modify keyframes
 - **Components**: `src/lib/components/` - Update individual components
 
 ## 📱 Responsive Design
 
-The homepage is fully responsive with breakpoints optimized for:
+The wedding website is fully responsive with breakpoints optimized for:
 
 - **Mobile**: 320px - 768px
 - **Tablet**: 768px - 1024px  
@@ -189,17 +178,17 @@ The homepage is fully responsive with breakpoints optimized for:
 - **Minimal JavaScript**: Only essential interactivity
 - **CSS Purging**: Unused Tailwind classes removed in production
 
-## 🌟 Biblical Foundation
+## 💕 Love & Gratitude
 
-> *"Look carefully then how you walk, not as unwise but as wise, making the best use of the time, because the days are evil."*  
-> — Ephesians 5:15-16 ESV
+> *"Two are better than one, because they have a good return for their labor: If either of them falls down, one can help the other up."*  
+> — Ecclesiastes 4:9-10 ESV
 
-KairOS is built on the principle of redeeming time and using technology wisely to honor our focus and attention.
+Our wedding website celebrates the beautiful journey of love and the joy of two hearts becoming one.
 
 ## 📄 License
 
-© 2025 Kairōs Inc. All rights reserved.
+© 2025 The Shumanbeans. All rights reserved.
 
 ---
 
-**Pronounced**: /kī-ROHS/ (Greek: καιρός - "the right time" or "opportune moment") 
+**Made with ❤️ for our special day**

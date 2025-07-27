@@ -5,8 +5,8 @@
 </script>
 
 <svelte:head>
-  <title>KairOS Browser — Redeem Your Time</title>
-  <meta name="description" content="The intent-driven browser that guards your attention, honors your focus, and frees you from endless scrolls." />
+  <title>The Shumanbeans Wedding — Two Hearts, One Journey</title>
+  <meta name="description" content="Join us in celebrating our love story and upcoming wedding. Find all the details, RSVP, and share in our joy at shumanbeans.com." />
 </svelte:head>
 
 <!-- Hero Section -->

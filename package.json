@@ -1,6 +1,12 @@
 {
-  "name": "svelte-kairos-homepage",
-  "version": "0.0.1",
+  "name": "shumanbeans-wedding",
+  "version": "1.0.0",
+  "description": "Wedding website for the Shumanbeans - sharing our love story and celebration details",
+  "homepage": "https://shumanbeans.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skylerahuman/shumanbeans-wedding.git"
+  },
   "private": true,
   "scripts": {
     "build": "vite build",
