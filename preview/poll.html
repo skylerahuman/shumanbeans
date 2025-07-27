@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Community Date Poll</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Community Date Poll</h1>
+  <div id="poll">
+    <label>Year: <select id="year"></select></label><br>
+    <label>Month: <select id="month"></select></label><br>
+    <label>Week: <select id="week"></select></label><br>
+    <label>Day: <select id="day"></select></label><br>
+    <button onclick="submitPoll()">Submit</button>
+  </div>
+  <div id="result"></div>
+  <script>
+const yearSelect = document.getElementById('year');
+for (let y=2025; y<=2026; y++) {
+  const opt = document.createElement('option');
+  opt.value = y; opt.textContent = y;
+  yearSelect.appendChild(opt);
+}
+const monthSelect = document.getElementById('month');
+const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+monthNames.forEach((m,i) => {
+  const opt = document.createElement('option');
+  opt.value = i+1; opt.textContent = m;
+  monthSelect.appendChild(opt);
+});
+function fillWeeks() {
+  const month = parseInt(monthSelect.value);
+  const year = parseInt(yearSelect.value);
+  const date = new Date(year, month-1, 1);
+  const weeks = [];
+  while(date.getMonth() === month-1) {
+    const w = Math.ceil(date.getDate()/7);
+    if (!weeks.includes(w)) weeks.push(w);
+    date.setDate(date.getDate()+1);
+  }
+  const weekSelect = document.getElementById('week');
+  weekSelect.innerHTML = '';
+  weeks.forEach(w => {
+    const opt = document.createElement('option');
+    opt.value = w; opt.textContent = 'Week ' + w;
+    weekSelect.appendChild(opt);
+  });
+  fillDays();
+}
+function fillDays() {
+  const year = parseInt(yearSelect.value);
+  const month = parseInt(monthSelect.value);
+  const week = parseInt(document.getElementById('week').value);
+  const date = new Date(year, month-1, 1);
+  const days = [];
+  while(date.getMonth() === month-1) {
+    const w = Math.ceil(date.getDate()/7);
+    if (w === week) {
+      days.push(date.getDate());
+    }
+    date.setDate(date.getDate()+1);
+  }
+  const daySelect = document.getElementById('day');
+  daySelect.innerHTML = '';
+  days.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    daySelect.appendChild(opt);
+  });
+}
+yearSelect.onchange = fillWeeks;
+monthSelect.onchange = fillWeeks;
+document.getElementById('week').onchange = fillDays;
+fillWeeks();
+function submitPoll() {
+  const y = yearSelect.value;
+  const m = monthNames[monthSelect.value-1];
+  const w = document.getElementById('week').value;
+  const d = document.getElementById('day').value;
+  document.getElementById('result').innerHTML = '<p>You picked ' + m + ' ' + d + ', ' + y + '</p><p>Thanks for voting!</p>';
+}
+  </script>
+</body>
+</html>
