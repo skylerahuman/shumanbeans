@@ -31,6 +31,19 @@ export default {
           'dark': '#2D1810',
           'medium': '#6F4E37',
           'light': '#F5E6D3'
+        },
+        // Wedding color palette
+        'wedding': {
+          'gold': '#D4AF37',
+          'blush': '#F8E8E8',
+          'sage': '#9CAF88',
+          'cream': '#FFF8DC',
+          'charcoal': '#36454F',
+          'silver': '#C0C0C0',
+          'navy': '#2C3E50',
+          'rose': '#E8B4B8',
+          'champagne': '#F5E6A3',
+          'eucalyptus': '#7C9885'
         }
       },
       fontFamily: {
