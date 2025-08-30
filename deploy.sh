@@ -33,7 +33,7 @@ echo "📥 Cloning Shumanbeans wedding website repository..."
 if [ -d "shumanbeans" ]; then
     echo "Directory exists, updating..."
     cd shumanbeans
-    git pull origin main
+    git pull origin refactor/kairos-to-wedding-transformation
 else
     git clone https://github.com/skylerahuman/shumanbeans.git
     cd shumanbeans
@@ -41,16 +41,16 @@ fi
 
 # Install dependencies
 echo "📦 Installing application dependencies..."
-npm install
+yarn install
 
 # Build the application
 echo "🏗️  Building the application..."
-npm run build
+yarn build
 
 # Start application with PM2
 echo "🚀 Starting application with PM2..."
 pm2 delete shumanbeans 2>/dev/null || true  # Delete if exists
-pm2 start server.js --name "shumanbeans"
+pm2 start "yarn start" --name "shumanbeans"
 pm2 startup
 pm2 save
 
