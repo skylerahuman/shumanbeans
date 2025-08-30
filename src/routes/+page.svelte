@@ -1,6 +1,7 @@
 <script lang="ts">
-  import CoffeeBeanWithBowtie from '$lib/components/CoffeeBeanWithBowtie.svelte';
-  import QRCodeComponent from '$lib/components/QRCodeComponent.svelte';
+  // Temporarily comment out components causing 500 errors in production
+  // import CoffeeBeanWithBowtie from '$lib/components/CoffeeBeanWithBowtie.svelte';
+  // import QRCodeComponent from '$lib/components/QRCodeComponent.svelte';
 </script>
 
 <svelte:head>
@@ -17,8 +18,18 @@
     Join us in celebrating our love story and upcoming wedding.
   </p>
   <div class="flex flex-col md:flex-row gap-8 items-center">
-    <CoffeeBeanWithBowtie className="w-32 md:w-40" />
-    <QRCodeComponent size={200} />
+    <!-- Temporary simple placeholders to fix 500 errors -->
+    <div class="w-32 h-32 md:w-40 md:h-40 bg-coffee-dark rounded-full flex items-center justify-center text-coffee-light text-4xl">
+      ☕💕
+    </div>
+    <div class="w-48 h-48 bg-coffee-light border-2 border-coffee-dark rounded-lg flex flex-col items-center justify-center p-4">
+      <div class="text-coffee-dark text-lg font-bold mb-2">Visit Our Site</div>
+      <div class="text-coffee-medium text-sm text-center">
+        <a href="https://shumanbeans.com" class="underline hover:text-coffee-dark transition-colors">
+          shumanbeans.com
+        </a>
+      </div>
+    </div>
   </div>
 
   <!-- CTA Buttons -->
