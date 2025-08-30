@@ -6,9 +6,11 @@
   html {
     font-family: 'Courier New', Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier, monospace;
     background: rgb(0,0,0);
+    /* Temporarily commented out missing background images
     background-image: url('%sveltekit.assets%/bg-paper.gif'), url('%sveltekit.assets%/scan-lines.png');
     background-size: cover, auto 2px;
     background-blend-mode: multiply;
+    */
   }
 
   body {

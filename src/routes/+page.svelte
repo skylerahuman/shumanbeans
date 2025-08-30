@@ -32,7 +32,8 @@
   </div>
 </section>
 
-<!-- Features Section -->
+<!-- Features Section - Temporarily commented out missing components -->
+<!-- 
 <section class="py-20 px-6 bg-gradient-to-b from-kairos-charcoal to-kairos-gunmetal">
   <div class="max-w-6xl mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -62,105 +63,16 @@
     </div>
   </div>
 </section>
+-->
 
-<!-- Intent Showcase Section -->
-<IntentShowcase />
-
-<!-- Trust & Social Proof Section -->
-<section class="py-20 px-6 bg-kairos-gunmetal">
-  <div class="max-w-6xl mx-auto">
-    <div class="text-center mb-16">
-      <h2 class="text-4xl md:text-5xl font-bold text-kairos-silver mb-6">
-        Built on <span class="text-kairos-trust-blue">Trust</span>, Loved by Users
-      </h2>
-    </div>
-    
-    <!-- User Avatars -->
-    <div class="flex justify-center items-center space-x-8 mb-12">
-      <div class="text-center">
-        <div class="w-16 h-16 bg-gradient-to-br from-kairos-trust-blue to-kairos-responsible-green rounded-full flex items-center justify-center text-white font-bold text-xl mb-2">
-          T
-        </div>
-        <div class="text-kairos-cool-gray text-sm">Theologians</div>
-      </div>
-      
-      <div class="text-center">
-        <div class="w-16 h-16 bg-gradient-to-br from-kairos-responsible-green to-kairos-warm-amber rounded-full flex items-center justify-center text-white font-bold text-xl mb-2">
-          P
-        </div>
-        <div class="text-kairos-cool-gray text-sm">Productivity Coaches</div>
-      </div>
-      
-      <div class="text-center">
-        <div class="w-16 h-16 bg-gradient-to-br from-kairos-warm-amber to-kairos-trust-blue rounded-full flex items-center justify-center text-white font-bold text-xl mb-2">
-          A
-        </div>
-        <div class="text-kairos-cool-gray text-sm">Privacy Advocates</div>
-      </div>
-    </div>
-    
-    <!-- Testimonials -->
-    <div class="bg-kairos-charcoal rounded-lg p-8 max-w-2xl mx-auto">
-      <div class="text-center">
-        <p class="text-kairos-silver text-lg mb-4 italic">
-          "KairOS changed how I work—I'm 40% more focused and never miss a deadline."
-        </p>
-        <div class="text-kairos-cool-gray">— Chloe R.</div>
-      </div>
-    </div>
-    
-    <div class="bg-kairos-charcoal rounded-lg p-8 max-w-2xl mx-auto mt-6">
-      <div class="text-center">
-        <p class="text-kairos-silver text-lg mb-4 italic">
-          "Finally, a browser that respects my time and data."
-        </p>
-        <div class="text-kairos-cool-gray">— Pastor J. Nguyen</div>
-      </div>
-    </div>
+<!-- Simple Wedding Footer -->
+<footer class="py-8 px-6 bg-coffee-dark text-coffee-light border-t border-coffee-medium">
+  <div class="max-w-4xl mx-auto text-center">
+    <p class="text-lg mb-2">
+      💕 The Shumanbeans Wedding 💕
+    </p>
+    <p class="text-coffee-medium">
+      © 2025 | Made with love for our special day
+    </p>
   </div>
-</section>
-
-<!-- Footer -->
-<footer class="py-16 px-6 bg-kairos-charcoal border-t border-kairos-cool-gray/20">
-  <div class="max-w-6xl mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-      <div>
-        <h3 class="text-kairos-silver font-bold text-xl mb-4">KairOS</h3>
-        <p class="text-kairos-cool-gray">
-          Redeem your time with the intent-driven browser.
-        </p>
-      </div>
-      
-      <div>
-        <h4 class="text-kairos-silver font-semibold mb-4">Product</h4>
-        <ul class="space-y-2 text-kairos-cool-gray">
-          <li><a href="#features" class="hover:text-kairos-trust-blue transition-colors">Features</a></li>
-          <li><a href="#docs" class="hover:text-kairos-trust-blue transition-colors">Documentation</a></li>
-          <li><a href="#github" class="hover:text-kairos-trust-blue transition-colors">GitHub</a></li>
-        </ul>
-      </div>
-      
-      <div>
-        <h4 class="text-kairos-silver font-semibold mb-4">Company</h4>
-        <ul class="space-y-2 text-kairos-cool-gray">
-          <li><a href="#privacy" class="hover:text-kairos-trust-blue transition-colors">Privacy Policy</a></li>
-          <li><a href="#about" class="hover:text-kairos-trust-blue transition-colors">About</a></li>
-        </ul>
-      </div>
-      
-      <div>
-        <h4 class="text-kairos-silver font-semibold mb-4">Scripture</h4>
-        <p class="text-kairos-cool-gray text-sm italic">
-          "Look carefully then how you walk, not as unwise but as wise, making the best use of the time..."
-        </p>
-        <div class="text-kairos-trust-blue text-sm mt-2">— Ephesians 5:15–16</div>
-      </div>
-    </div>
-    
-    <div class="border-t border-kairos-cool-gray/20 pt-8 text-center">
-      <p class="text-kairos-cool-gray">
-        © 2025 Kairōs Inc. All rights reserved. | Pronounced <span class="text-kairos-trust-blue">/kī-ROHS/</span>
-      </p>
-    </div>
-  </div>
-</footer> 
+</footer>
