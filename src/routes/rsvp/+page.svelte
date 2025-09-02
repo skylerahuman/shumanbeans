@@ -141,16 +141,19 @@
                 <h2 class="text-2xl font-serif font-semibold text-coffee-800 mb-4">Who's Attending?</h2>
                 
                 <div class="mb-4">
-                  <label class="block text-sm font-medium text-coffee-700 mb-2">
-                    Attendee Names *
-                  </label>
+                  <fieldset class="border border-coffee-200 rounded-lg p-4">
+                    <legend class="text-sm font-medium text-coffee-700 px-2">
+                      Attendee Names *
+                    </legend>
                   {#each attendeeNames as name, index}
                     <div class="flex gap-2 mb-2">
+                      <label for="attendee-{index}" class="sr-only">Attendee {index + 1} name</label>
                       <input
                         type="text"
+                        id="attendee-{index}"
                         name="attendeeNames"
                         bind:value={attendeeNames[index]}
-                        placeholder="Full name of attendee"
+                        placeholder="Full name of attendee {index + 1}"
                         class="flex-1 px-4 py-2 border border-coffee-300 rounded-md focus:ring-2 focus:ring-coffee-500 focus:border-coffee-500 transition-colors"
                       />
                       {#if index > 0}
@@ -205,16 +208,19 @@
                 
                 {#if hasChildren}
                   <div class="ml-6 mb-4" transition:fade={{ duration: 300 }}>
-                    <label class="block text-sm font-medium text-coffee-700 mb-2">
-                      Children's Names
-                    </label>
+                    <fieldset class="border border-coffee-200 rounded-lg p-4">
+                      <legend class="text-sm font-medium text-coffee-700 px-2">
+                        Children's Names
+                      </legend>
                     {#each childrenNames as name, index}
                       <div class="flex gap-2 mb-2">
+                        <label for="child-{index}" class="sr-only">Child {index + 1} name and age</label>
                         <input
                           type="text"
+                          id="child-{index}"
                           name="childrenNames"
                           bind:value={childrenNames[index]}
-                          placeholder="Child's name and age"
+                          placeholder="Child {index + 1} name and age"
                           class="flex-1 px-4 py-2 border border-coffee-300 rounded-md focus:ring-2 focus:ring-coffee-500 focus:border-coffee-500 transition-colors"
                         />
                         {#if index > 0}
@@ -245,10 +251,10 @@
               <section class="mb-8">
                 <h2 class="text-2xl font-serif font-semibold text-coffee-800 mb-4">Let Us Know</h2>
                 
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-coffee-700 mb-2">
+                <fieldset class="mb-4">
+                  <legend class="text-sm font-medium text-coffee-700 mb-2">
                     Will you need parking?
-                  </label>
+                  </legend>
                   <div class="space-y-2">
                     {#each [['yes', 'Yes'], ['no', 'No'], ['unsure', "I'm not sure yet"]] as [value, label]}
                       <label class="flex items-center">
@@ -263,7 +269,7 @@
                       </label>
                     {/each}
                   </div>
-                </div>
+                </fieldset>
                 
                 <div class="mb-4">
                   <label for="dietaryRestrictions" class="block text-sm font-medium text-coffee-700 mb-2">

@@ -39,18 +39,18 @@
         >
           <span>🛒</span> Amazon Registry
         </a>
-        <a 
-          href="#" 
-          class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-md font-medium transition-colors duration-300 flex items-center gap-2"
+        <button 
+          disabled
+          class="bg-coffee-600 text-white px-6 py-3 rounded-md font-medium cursor-not-allowed opacity-75 flex items-center gap-2"
         >
           <span>🏠</span> Crate & Barrel (Coming Soon)
-        </a>
-        <a 
-          href="#" 
-          class="bg-coffee-600 hover:bg-coffee-700 text-white px-6 py-3 rounded-md font-medium transition-colors duration-300 flex items-center gap-2"
+        </button>
+        <button 
+          disabled
+          class="bg-coffee-600 text-white px-6 py-3 rounded-md font-medium cursor-not-allowed opacity-75 flex items-center gap-2"
         >
           <span>🔨</span> Home Depot (Coming Soon)
-        </a>
+        </button>
       </div>
     </div>
   </section>
