@@ -10,7 +10,7 @@
   "private": true,
   "scripts": {
     "prebuild": "svelte-kit sync",
-    "build": "svelte-kit build",
+    "build": "vite build",
     "start": "node build",
     "dev": "vite dev --host",
     "preview": "vite preview --host",
