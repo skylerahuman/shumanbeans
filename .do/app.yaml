@@ -1,7 +1,7 @@
 name: shumanbeans-wedding
 services:
 - name: web
-  source_dir: /
+  source_dir: .
   github:
     repo: skylerahuman/shumanbeans
     branch: main
