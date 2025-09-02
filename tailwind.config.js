@@ -1,113 +1,84 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+        mono: ['"Courier New"', 'monospace']
+      },
       colors: {
-        // Retro Web 1.0 Color Palette
-        'retro': {
-          'dark-green': '#003300',
-          'matrix-green': '#00FF00',
-          'lime-green': '#32CD32',
-          'electric-blue': '#0080FF',
-          'neon-cyan': '#00FFFF',
-          'hot-pink': '#FF1493',
-          'bright-yellow': '#FFFF00',
-          'orange-red': '#FF4500',
-          'purple': '#800080',
-          'silver': '#C0C0C0',
-          'black': '#000000',
-          'white': '#FFFFFF',
-          'gray': '#808080',
-          'maroon': '#800000'
+        coffee: {
+          50: '#FAF7F0',
+          100: '#F5E6D3',
+          200: '#E8D5B8',
+          300: '#D4B896',
+          400: '#C19A73',
+          500: '#A67C52',
+          600: '#8B5D3B',
+          700: '#6F4E37',
+          800: '#5D4037',
+          900: '#3C2414',
+          950: '#2D1B10'
         },
-        // Coffee bean inspired colors
-        'coffee': {
-          'bean': '#3C2414',
-          'roast': '#5D4037',
-          'espresso': '#2F1B14',
-          'cream': '#F5F5DC',
-          'latte': '#D2B48C',
-          'dark': '#2D1810',
-          'medium': '#6F4E37',
-          'light': '#F5E6D3'
+        cream: {
+          50: '#FEFCF8',
+          100: '#FCF7EE',
+          200: '#F7EDD5',
+          300: '#F0DDB5',
+          400: '#E6C896',
+          500: '#DAB474',
+          600: '#C69C56',
+          700: '#9B7B44',
+          800: '#7A6139',
+          900: '#5C4932'
         },
-        // Wedding color palette
-        'wedding': {
-          'gold': '#D4AF37',
-          'blush': '#F8E8E8',
-          'sage': '#9CAF88',
-          'cream': '#FFF8DC',
-          'charcoal': '#36454F',
-          'silver': '#C0C0C0',
-          'navy': '#2C3E50',
-          'rose': '#E8B4B8',
-          'champagne': '#F5E6A3',
-          'eucalyptus': '#7C9885'
+        sepia: {
+          100: '#F4F0E8',
+          200: '#E8DFD0',
+          300: '#D9C9B0',
+          400: '#C7B08A',
+          500: '#B5946D',
+          600: '#9E7C57',
+          700: '#7D6245',
+          800: '#604C37',
+          900: '#463629'
         }
       },
-      fontFamily: {
-        // Monospaced fonts for that retro feel
-        'mono': ['Courier New', 'Monaco', 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier', 'monospace'],
-        'retro': ['Arial', 'Helvetica', 'sans-serif'],
-        'system': ['Times New Roman', 'Times', 'serif']
-      },
       animation: {
-        'marquee': 'marquee 15s linear infinite',
-        'marquee-reverse': 'marquee-reverse 15s linear infinite',
-        'blink': 'blink 1s step-end infinite',
-        'flicker': 'flicker 0.15s infinite linear',
-        'scan-lines': 'scan-lines 0.1s linear infinite',
-        'glow-pulse': 'glow-pulse 2s ease-in-out infinite alternate'
+        'fade-in': 'fadeIn 0.6s ease-in-out',
+        'slide-up': 'slideUp 0.8s ease-out',
+        'grain': 'grain 8s steps(10) infinite'
       },
       keyframes: {
-        marquee: {
-          '0%': { transform: 'translateX(100%)' },
-          '100%': { transform: 'translateX(-100%)' }
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
         },
-        'marquee-reverse': {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' }
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
         },
-        blink: {
-          '0%, 50%': { opacity: '1' },
-          '51%, 100%': { opacity: '0' }
-        },
-        flicker: {
-          '0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100%': {
-            opacity: '0.99',
-            filter: 'drop-shadow(0 0 1px rgba(252, 211, 77)) drop-shadow(0 0 15px rgba(245, 101, 101)) drop-shadow(0 0 1px rgba(252, 211, 77))'
-          },
-          '20%, 21.999%, 63%, 63.999%, 65%, 69.999%': {
-            opacity: '0.4',
-            filter: 'none'
-          }
-        },
-        'scan-lines': {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100vh)' }
-        },
-        'glow-pulse': {
-          '0%': { 
-            textShadow: '0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor',
-            filter: 'brightness(1)'
-          },
-          '100%': { 
-            textShadow: '0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor',
-            filter: 'brightness(1.2)'
-          }
+        grain: {
+          '0%, 100%': { transform: 'translate(0, 0)' },
+          '10%': { transform: 'translate(-5%, -10%)' },
+          '20%': { transform: 'translate(-15%, 5%)' },
+          '30%': { transform: 'translate(7%, -25%)' },
+          '40%': { transform: 'translate(-5%, 25%)' },
+          '50%': { transform: 'translate(-15%, 10%)' },
+          '60%': { transform: 'translate(15%, 0%)' },
+          '70%': { transform: 'translate(0%, 15%)' },
+          '80%': { transform: 'translate(3%, 35%)' },
+          '90%': { transform: 'translate(-10%, 10%)' }
         }
       },
       backgroundImage: {
-        'retro-dots': 'radial-gradient(circle, #00FF00 1px, transparent 1px)',
-        'scan-lines': 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.03) 2px, rgba(0, 255, 0, 0.03) 4px)',
-        'crt-flicker': 'linear-gradient(90deg, transparent 50%, rgba(0, 255, 0, 0.02) 50%)',
-        'coffee-texture': 'radial-gradient(circle at 25% 25%, #3C2414 0%, #2F1B14 50%, #5D4037 100%)'
-      },
-      backdropFilter: {
-        'retro': 'contrast(1.2) brightness(1.1) saturate(1.3)'
+        'paper-grain': "url('data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='7' r='1'/%3E%3Ccircle cx='47' cy='7' r='1'/%3E%3Ccircle cx='17' cy='17' r='1'/%3E%3Ccircle cx='37' cy='17' r='1'/%3E%3Ccircle cx='7' cy='27' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='27' r='1'/%3E%3Ccircle cx='17' cy='37' r='1'/%3E%3Ccircle cx='37' cy='37' r='1'/%3E%3Ccircle cx='7' cy='47' r='1'/%3E%3Ccircle cx='27' cy='47' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"
       }
     }
   },
-  plugins: []
-};
+  plugins: [
+    require('@tailwindcss/typography')
+  ]
+}
