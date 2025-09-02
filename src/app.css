@@ -1,16 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html {
-    font-family: 'Courier New', Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier, monospace;
-    background: rgb(0,0,0);
-    /* Temporarily commented out missing background images
-    background-image: url('%sveltekit.assets%/bg-paper.gif'), url('%sveltekit.assets%/scan-lines.png');
-    background-size: cover, auto 2px;
-    background-blend-mode: multiply;
-    */
+    font-family: theme('fontFamily.sans');
+    background: theme('colors.cream.50');
+    background-image: theme('backgroundImage.paper-grain');
+    scroll-behavior: smooth;
   }
 
   body {
@@ -19,7 +18,14 @@
     min-height: 100vh;
     font-family: inherit;
     background: transparent;
-    color: theme('colors.retro.silver');
+    color: theme('colors.coffee.900');
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: theme('fontFamily.serif');
+    font-weight: 600;
+    color: theme('colors.coffee.800');
   }
 
   marquee {

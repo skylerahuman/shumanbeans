@@ -6,8 +6,8 @@ services:
     repo: skylerahuman/shumanbeans
     branch: refactor/kairos-to-wedding-transformation
     deploy_on_push: true
-  build_command: yarn install && yarn build
-  run_command: yarn start
+  build_command: npm install && npm run build
+  run_command: npm start
   environment_slug: node-js
   instance_count: 1
   instance_size_slug: basic-xxs
