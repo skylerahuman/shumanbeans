@@ -31,7 +31,6 @@ shumanbeans/
 │   │       └── IntentShowcase.svelte  # RSVP or registry showcase
 │   ├── app.html               # HTML template
 │   └── app.css               # Global styles & Tailwind
-├── server.js                 # Node.js Express server
 ├── package.json             # Dependencies & scripts
 ├── deploy.sh                # Deployment script
 └── tailwind.config.js       # Custom wedding color palette
@@ -40,6 +39,7 @@ shumanbeans/
 ## 💐 Wedding Information
 
 ### Save the Date
+
 - **Date**: [To be announced]
 - **Venue**: [To be announced]
 - **Theme**: Elegant and timeless celebration of love
@@ -58,6 +58,7 @@ The website maintains an elegant design palette suitable for a wedding celebrati
 ### Installation
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
@@ -68,23 +69,25 @@ The website maintains an elegant design palette suitable for a wedding celebrati
    ```
    The app will be available at `http://localhost:5173`
 
-3. **Start the API server (in a separate terminal):**
-   ```bash
-   node server.js
-   ```
-   The API will be available at `http://localhost:3000`
-
 ### Production Build
 
 1. **Build the SvelteKit app:**
+
    ```bash
    npm run build
    ```
 
 2. **Start the production server:**
    ```bash
-   node server.js
+   npm start
    ```
+
+### Deployment (DigitalOcean)
+
+This project deploys on [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform).
+
+- **Build command**: `NPM_CONFIG_PRODUCTION=false npm ci && npm run build`
+- **Start command**: `npm start`
 
 ## 🔌 API Endpoints
 
@@ -93,6 +96,7 @@ The website maintains an elegant design palette suitable for a wedding celebrati
 Handle RSVP submissions from wedding guests.
 
 **Request:**
+
 ```json
 {
   "name": "John and Jane Smith",
@@ -104,6 +108,7 @@ Handle RSVP submissions from wedding guests.
 ```
 
 **Response:**
+
 ```json
 {
   "result": "RSVP received successfully",
@@ -120,24 +125,28 @@ Health check endpoint for monitoring.
 ## 🎯 Key Components
 
 ### Hero Section
+
 - Beautiful wedding-themed background
 - Couple names and wedding date prominently displayed
 - RSVP and registry call-to-action buttons
 - Responsive typography scaling
 
 ### Information Cards
+
 - Wedding date and time details
 - Venue information with directions
 - Schedule of events
 - Travel and accommodation information
 
 ### RSVP System
+
 - Simple and elegant response form
 - Guest count and dietary restriction capture
 - Confirmation messaging
 - Email notifications
 
 ### Love Story & Gallery
+
 - Timeline of the relationship
 - Photo carousel of memorable moments
 - Engagement story
@@ -168,7 +177,7 @@ The design system can be easily customized by modifying:
 The wedding website is fully responsive with breakpoints optimized for:
 
 - **Mobile**: 320px - 768px
-- **Tablet**: 768px - 1024px  
+- **Tablet**: 768px - 1024px
 - **Desktop**: 1024px+
 - **Large Desktop**: 1440px+
 
@@ -181,7 +190,7 @@ The wedding website is fully responsive with breakpoints optimized for:
 
 ## 💕 Love & Gratitude
 
-> *"Two are better than one, because they have a good return for their labor: If either of them falls down, one can help the other up."*  
+> _"Two are better than one, because they have a good return for their labor: If either of them falls down, one can help the other up."_  
 > — Ecclesiastes 4:9-10 ESV
 
 Our wedding website celebrates the beautiful journey of love and the joy of two hearts becoming one.

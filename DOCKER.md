@@ -15,6 +15,7 @@ This Docker Compose setup exactly emulates your DigitalOcean App Platform drople
 ## Quick Start
 
 ### Production Mode (Emulates DigitalOcean exactly)
+
 ```bash
 # Build and run production container
 make up
@@ -27,6 +28,7 @@ make down
 ```
 
 ### Development Mode (With live reload)
+
 ```bash
 # Start development container
 make dev
@@ -41,27 +43,28 @@ make logs-dev
 
 ## Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `make help` | Show all available commands |
-| `make build` | Build production Docker image |
-| `make up` | Start production container (port 3000) |
-| `make dev` | Start development container (ports 5173, 3001) |
-| `make down` | Stop and remove containers |
-| `make logs` | Show production container logs |
-| `make logs-dev` | Show development container logs |
-| `make status` | Show container status |
-| `make shell` | Open bash shell in production container |
-| `make shell-dev` | Open bash shell in development container |
-| `make test` | Test production build and basic connectivity |
-| `make clean` | Remove containers, images, and volumes |
-| `make rebuild` | Clean rebuild from scratch |
+| Command          | Description                                    |
+| ---------------- | ---------------------------------------------- |
+| `make help`      | Show all available commands                    |
+| `make build`     | Build production Docker image                  |
+| `make up`        | Start production container (port 3000)         |
+| `make dev`       | Start development container (ports 5173, 3001) |
+| `make down`      | Stop and remove containers                     |
+| `make logs`      | Show production container logs                 |
+| `make logs-dev`  | Show development container logs                |
+| `make status`    | Show container status                          |
+| `make shell`     | Open bash shell in production container        |
+| `make shell-dev` | Open bash shell in development container       |
+| `make test`      | Test production build and basic connectivity   |
+| `make clean`     | Remove containers, images, and volumes         |
+| `make rebuild`   | Clean rebuild from scratch                     |
 
 ## Raw Docker Compose Commands
 
 If you prefer using Docker Compose directly:
 
 ### Production
+
 ```bash
 # Build
 docker compose build web
@@ -77,6 +80,7 @@ docker compose down
 ```
 
 ### Development
+
 ```bash
 # Start development with live reload
 docker compose --profile dev up -d web-dev
@@ -91,6 +95,7 @@ docker compose --profile dev down
 ## Configuration Matching
 
 ### DigitalOcean App Platform → Docker
+
 - `environment_slug: node-js` → Ubuntu 22.04 + Node.js 18.x
 - `instance_size_slug: basic-xxs` → 0.5 CPU, 512MB RAM limits
 - `build_command: npm install && npm run build` → Dockerfile RUN commands
@@ -99,6 +104,7 @@ docker compose --profile dev down
 - `NODE_ENV: production` → Environment variable
 
 ### File Structure
+
 ```
 .
 ├── Dockerfile              # Production image (Ubuntu 22.04)
@@ -112,20 +118,23 @@ docker compose --profile dev down
 ## Resource Limits
 
 The production container is configured with resource limits that simulate the DigitalOcean `basic-xxs` instance:
+
 - **CPU**: 0.5 cores (limit), 0.25 cores (reservation)
 - **Memory**: 512MB (limit), 256MB (reservation)
 
 ## Health Checks
 
 Both containers include health checks that match DigitalOcean App Platform monitoring:
+
 - **Interval**: Every 30 seconds
-- **Timeout**: 10 seconds  
+- **Timeout**: 10 seconds
 - **Retries**: 3 attempts
 - **Start Period**: 40 seconds
 
 ## Volumes and Development
 
 The development container mounts your source code for live development:
+
 - Source code: `.:/app`
 - Node modules: `/app/node_modules` (excluded from mount)
 - Build cache: `/app/.svelte-kit` (excluded from mount)
@@ -133,6 +142,7 @@ The development container mounts your source code for live development:
 ## Troubleshooting
 
 ### Build Issues
+
 ```bash
 # Clean rebuild
 make rebuild
@@ -142,6 +152,7 @@ docker compose build web --progress=plain
 ```
 
 ### Runtime Issues
+
 ```bash
 # View detailed logs
 make logs
@@ -154,7 +165,9 @@ docker compose ps
 ```
 
 ### Port Conflicts
+
 If ports 3000, 3001, or 5173 are in use:
+
 ```bash
 # Check what's using the port
 sudo netstat -tulpn | grep :3000

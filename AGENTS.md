@@ -20,16 +20,19 @@ Wedding Feature Architecture:
 ## 🎯 Automated Wedding Features
 
 ### 1. RSVP Processing System
+
 **Location**: `/api/intent` with RSVP-specific handling  
 **Purpose**: Automated guest response management
 
 **Capabilities:**
+
 - 📝 **Response Collection** - Capture guest attendance confirmations
 - 🍽️ **Dietary Tracking** - Automatic dietary restriction logging
 - 📊 **Attendance Analytics** - Real-time guest count tracking
 - 📧 **Confirmation Emails** - Automated thank you messages
 
 **Example RSVP Request:**
+
 ```json
 {
   "intent": "RSVP for John and Jane Smith, attending with 2 guests, vegetarian meals needed"
@@ -37,20 +40,24 @@ Wedding Feature Architecture:
 ```
 
 ### 2. Date Polling Agent
+
 **Location**: `/date-poll` route  
 **Purpose**: Collaborative wedding date selection
 
 **Features:**
+
 - **Availability Collection** - Gather guest availability preferences
 - **Conflict Resolution** - Identify optimal dates for maximum attendance
 - **Real-time Updates** - Live polling results for family coordination
 - **Decision Analytics** - Data-driven date recommendation
 
 ### 3. Guest Entertainment System
+
 **Location**: `/hackbox` route  
 **Purpose**: Interactive games and activities for wedding guests
 
 **Components:**
+
 - `HackboxLobby.svelte` - Guest check-in and game room setup
 - `HackboxQuestion.svelte` - Wedding trivia and couple questions
 - `HackboxTimer.svelte` - Timed activities and photo challenges
@@ -58,6 +65,7 @@ Wedding Feature Architecture:
 - `HackboxGame.svelte` - Main entertainment orchestration
 
 **Game Types:**
+
 - 💝 **Couple Trivia** - How well do guests know the couple?
 - 📸 **Photo Challenges** - Scavenger hunt style activities
 - 🗳️ **Wish Voting** - Guests vote on best wedding wishes
@@ -66,23 +74,26 @@ Wedding Feature Architecture:
 ## 🤖 Wedding Planning Automation
 
 ### Guest Communication Bot
+
 Automated responses for common wedding inquiries:
 
 ```javascript
 // Wedding-specific intent processing
-if (intent.toLowerCase().includes('rsvp')) {
+if (intent.toLowerCase().includes("rsvp")) {
   actions = [
-    'Processing RSVP response...',
-    'Updating guest list...',
-    'Sending confirmation email...',
-    'RSVP recorded successfully ✓'
+    "Processing RSVP response...",
+    "Updating guest list...",
+    "Sending confirmation email...",
+    "RSVP recorded successfully ✓",
   ];
-  result = 'Thank you for your RSVP! We can\'t wait to celebrate with you.';
+  result = "Thank you for your RSVP! We can't wait to celebrate with you.";
 }
 ```
 
 ### Vendor Coordination
+
 Automated scheduling and communication:
+
 - **Photographer Scheduling** - Optimal timeline coordination
 - **Catering Management** - Guest count and dietary updates
 - **Venue Communication** - Setup and logistics automation
@@ -91,18 +102,23 @@ Automated scheduling and communication:
 ## 🎨 Wedding UI Components
 
 ### Design System
+
 The interactive features use a romantic color palette:
 
 ```css
 /* Wedding Color Palette (replacing kairos-* classes) */
 .text-wedding-gold        /* Elegant gold accents */
+/* Elegant gold accents */
+/* Elegant gold accents */
+/* Elegant gold accents */
 .text-wedding-blush       /* Soft romantic pink */
 .text-wedding-sage        /* Natural sage green */
 .text-wedding-cream       /* Warm cream backgrounds */
-.text-wedding-charcoal    /* Sophisticated dark text */
+.text-wedding-charcoal; /* Sophisticated dark text */
 ```
 
 ### Interactive Elements
+
 - **QR Code Generator** - Dynamic invitation and info sharing
 - **Real-time Polling** - Live guest preference collection
 - **Photo Gallery** - Automated memory timeline
@@ -113,26 +129,27 @@ The interactive features use a romantic color palette:
 ### Adding Wedding Features
 
 1. **Create New Wedding Components**:
+
 ```typescript
 // WeddingFeature.svelte
-<script lang="ts">
-  // Wedding-specific logic
-</script>
+<script lang="ts">// Wedding-specific logic</script>
 ```
 
 2. **Extend Guest Management**:
+
 ```javascript
 // In server.js
-app.post('/api/wedding-feature', (req, res) => {
+app.post("/api/wedding-feature", (req, res) => {
   // Handle wedding-specific requests
 });
 ```
 
 3. **Real-time Guest Interaction**:
+
 ```typescript
 // Socket.IO for live wedding updates
-io.on('connection', (socket) => {
-  socket.on('guest_action', (data) => {
+io.on("connection", (socket) => {
+  socket.on("guest_action", (data) => {
     // Broadcast to other wedding guests
   });
 });
@@ -174,15 +191,17 @@ CREATE TABLE wedding_games (
 ## 🚀 Running Wedding Features
 
 ### Development Mode
+
 ```bash
 # Start the wedding website with all interactive features
 npm run dev
 
-# Start the backend for RSVP and game automation  
+# Start the backend for RSVP and game automation
 node server.js
 ```
 
 ### Wedding Day Deployment
+
 ```bash
 # Build for wedding day
 npm run build
@@ -194,12 +213,15 @@ npm run build
 ## 📱 Guest Experience Features
 
 ### Mobile-First Design
+
 All interactive wedding features are optimized for:
+
 - **Guest Mobile Devices** - Easy RSVP on phones
 - **Tablet Check-ins** - Wedding day registration
 - **Large Displays** - Reception slideshow and games
 
 ### Real-time Updates
+
 - **Live Guest Count** - Real-time attendance tracking
 - **Game Leaderboards** - Live scoring during reception
 - **Photo Stream** - Live wedding photo sharing
@@ -208,18 +230,21 @@ All interactive wedding features are optimized for:
 ## 💐 Wedding-Specific Automation
 
 ### Pre-Wedding
+
 - [ ] **Save the Date** automation - Email scheduling
 - [ ] **Invitation Tracking** - RSVP deadline reminders
 - [ ] **Vendor Coordination** - Automated status updates
 - [ ] **Guest Preferences** - Dietary and seating optimization
 
 ### Wedding Day
+
 - [ ] **Check-in Automation** - QR code guest registration
 - [ ] **Photo Collection** - Automated guest photo gathering
 - [ ] **Timeline Management** - Event scheduling and reminders
 - [ ] **Music Requests** - Live DJ playlist updates
 
 ### Post-Wedding
+
 - [ ] **Thank You Notes** - Automated personalized messages
 - [ ] **Photo Sharing** - Guest photo distribution
 - [ ] **Memory Book** - Automated compilation of wedding moments
