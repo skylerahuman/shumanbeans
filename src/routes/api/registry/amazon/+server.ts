@@ -1,9 +1,8 @@
-import { json, error } from '@sveltejs/kit';
-import * as cheerio from 'cheerio';
-import type { RequestHandler } from './$types';
+import { json, error } from "@sveltejs/kit";
+import type { RequestHandler } from "./$types";
 
 // Simple in-memory cache
-let cachedData: any = null;
+let cachedData: Product[] | null = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 
@@ -17,67 +16,73 @@ interface Product {
 
 async function fetchAmazonRegistry(): Promise<Product[]> {
   try {
-    const registryUrl = 'https://www.amazon.com/wedding/share/shumanbeans';
-    
     // Simulate Amazon registry items since actual scraping may be blocked
     // TODO: Replace with actual scraping when Amazon allows it or use official API
     const mockProducts: Product[] = [
       {
-        title: 'KitchenAid Stand Mixer - Artisan Series 5-Qt',
-        price: '$349.95',
-        image: 'https://images.unsplash.com/photo-1588515724664-bdf7f88e49b3?w=400&h=400&fit=crop',
-        url: 'https://a.co/d/dvH0YtG',
-        source: 'Amazon'
+        title: "KitchenAid Stand Mixer - Artisan Series 5-Qt",
+        price: "$349.95",
+        image:
+          "https://images.unsplash.com/photo-1588515724664-bdf7f88e49b3?w=400&h=400&fit=crop",
+        url: "https://a.co/d/dvH0YtG",
+        source: "Amazon",
       },
       {
-        title: 'Chemex Classic Series Pour-Over Glass Coffee Maker - 6 Cup',
-        price: '$47.20',
-        image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=400&fit=crop',
-        url: 'https://amazon.com/dp/B0047BIWSK',
-        source: 'Amazon'
+        title: "Chemex Classic Series Pour-Over Glass Coffee Maker - 6 Cup",
+        price: "$47.20",
+        image:
+          "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=400&fit=crop",
+        url: "https://amazon.com/dp/B0047BIWSK",
+        source: "Amazon",
       },
       {
-        title: 'Ninja Foodi Personal Blender',
-        price: '$79.99',
-        image: 'https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=400&h=400&fit=crop',
-        url: 'https://amazon.com/dp/B07GNTQXSH',
-        source: 'Amazon'
+        title: "Ninja Foodi Personal Blender",
+        price: "$79.99",
+        image:
+          "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=400&h=400&fit=crop",
+        url: "https://amazon.com/dp/B07GNTQXSH",
+        source: "Amazon",
       },
       {
-        title: 'All-Clad D3 Stainless Steel Cookware Set, 10-Piece',
-        price: '$499.95',
-        image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop',
-        url: 'https://amazon.com/dp/B00005AL5R',
-        source: 'Amazon'
+        title: "All-Clad D3 Stainless Steel Cookware Set, 10-Piece",
+        price: "$499.95",
+        image:
+          "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop",
+        url: "https://amazon.com/dp/B00005AL5R",
+        source: "Amazon",
       },
       {
-        title: 'Instant Pot Duo 7-in-1 Electric Pressure Cooker',
-        price: '$99.95',
-        image: 'https://images.unsplash.com/photo-1588515723496-6c4a37b15b89?w=400&h=400&fit=crop',
-        url: 'https://amazon.com/dp/B00FLYWNYQ',
-        source: 'Amazon'
+        title: "Instant Pot Duo 7-in-1 Electric Pressure Cooker",
+        price: "$99.95",
+        image:
+          "https://images.unsplash.com/photo-1588515723496-6c4a37b15b89?w=400&h=400&fit=crop",
+        url: "https://amazon.com/dp/B00FLYWNYQ",
+        source: "Amazon",
       },
       {
-        title: 'Vitamix 5200 Blender Professional-Grade',
-        price: '$349.95',
-        image: 'https://images.unsplash.com/photo-1610450949065-1f2841536c88?w=400&h=400&fit=crop',
-        url: 'https://amazon.com/dp/B008H4SLV6',
-        source: 'Amazon'
+        title: "Vitamix 5200 Blender Professional-Grade",
+        price: "$349.95",
+        image:
+          "https://images.unsplash.com/photo-1610450949065-1f2841536c88?w=400&h=400&fit=crop",
+        url: "https://amazon.com/dp/B008H4SLV6",
+        source: "Amazon",
       },
       {
-        title: 'Le Creuset Enameled Cast Iron Dutch Oven, 5.5 qt',
-        price: '$349.95',
-        image: 'https://images.unsplash.com/photo-1584990892821-38b9d3bb4a8d?w=400&h=400&fit=crop',
-        url: 'https://amazon.com/dp/B00UQTN5OG',
-        source: 'Amazon'
+        title: "Le Creuset Enameled Cast Iron Dutch Oven, 5.5 qt",
+        price: "$349.95",
+        image:
+          "https://images.unsplash.com/photo-1584990892821-38b9d3bb4a8d?w=400&h=400&fit=crop",
+        url: "https://amazon.com/dp/B00UQTN5OG",
+        source: "Amazon",
       },
       {
-        title: 'Bamboo Cutting Board Set with Juice Groove',
-        price: '$39.99',
-        image: 'https://images.unsplash.com/photo-1594736797933-d0c6bf88fed9?w=400&h=400&fit=crop',
-        url: 'https://amazon.com/dp/B07V8XM17Q',
-        source: 'Amazon'
-      }
+        title: "Bamboo Cutting Board Set with Juice Groove",
+        price: "$39.99",
+        image:
+          "https://images.unsplash.com/photo-1594736797933-d0c6bf88fed9?w=400&h=400&fit=crop",
+        url: "https://amazon.com/dp/B07V8XM17Q",
+        source: "Amazon",
+      },
     ];
 
     return mockProducts;
@@ -94,21 +99,21 @@ async function fetchAmazonRegistry(): Promise<Product[]> {
     //     'Upgrade-Insecure-Requests': '1'
     //   }
     // });
-    // 
+    //
     // if (!response.ok) {
     //   console.error('Failed to fetch Amazon registry:', response.status, response.statusText);
     //   return [];
     // }
-    // 
+    //
     // const html = await response.text();
     // const $ = cheerio.load(html);
-    // 
+    //
     // const products: Product[] = [];
-    // 
+    //
     // // Amazon wedding registry selectors (these may change frequently)
     // $('.g-item-sortable, [data-item-prime-info]').each((index, element) => {
     //   const $el = $(element);
-    //   
+    //
     //   const title = $el.find('.a-size-base-plus, .a-truncate-cut, [data-cy="item-title"]').first().text().trim();
     //   const priceEl = $el.find('.a-price-whole, .a-offscreen, .a-price .a-offscreen').first();
     //   const price = priceEl.length > 0 ? priceEl.text().trim() : '';
@@ -117,7 +122,7 @@ async function fetchAmazonRegistry(): Promise<Product[]> {
     //   const linkEl = $el.find('a[href*="/dp/"], a[href*="/gp/product/"]').first();
     //   const relativeUrl = linkEl.length > 0 ? linkEl.attr('href') || '' : '';
     //   const url = relativeUrl.startsWith('http') ? relativeUrl : `https://amazon.com${relativeUrl}`;
-    //   
+    //
     //   if (title && title.length > 0) {
     //     products.push({
     //       title,
@@ -128,11 +133,10 @@ async function fetchAmazonRegistry(): Promise<Product[]> {
     //     });
     //   }
     // });
-    // 
+    //
     // return products.slice(0, 20); // Limit to first 20 items
-    
   } catch (err) {
-    console.error('Error fetching Amazon registry:', err);
+    console.error("Error fetching Amazon registry:", err);
     return []; // Return empty array on error
   }
 }
@@ -140,31 +144,30 @@ async function fetchAmazonRegistry(): Promise<Product[]> {
 export const GET: RequestHandler = async () => {
   try {
     const now = Date.now();
-    
+
     // Check if we have cached data that's still valid
-    if (cachedData && cacheTimestamp && (now - cacheTimestamp) < CACHE_DURATION) {
+    if (cachedData && cacheTimestamp && now - cacheTimestamp < CACHE_DURATION) {
       return json({
         products: cachedData,
         cached: true,
-        timestamp: cacheTimestamp
+        timestamp: cacheTimestamp,
       });
     }
-    
+
     // Fetch fresh data
     const products = await fetchAmazonRegistry();
-    
+
     // Update cache
     cachedData = products;
     cacheTimestamp = now;
-    
+
     return json({
       products,
       cached: false,
-      timestamp: cacheTimestamp
+      timestamp: cacheTimestamp,
     });
-    
   } catch (err) {
-    console.error('Registry API error:', err);
-    throw error(500, 'Failed to fetch registry data');
+    console.error("Registry API error:", err);
+    throw error(500, "Failed to fetch registry data");
   }
 };
