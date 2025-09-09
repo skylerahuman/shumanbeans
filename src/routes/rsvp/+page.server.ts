@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import { appendRSVPToSheet, initializeSheetHeaders } from "$lib/services/googleSheets.js";
+import { appendRSVPToSheet, initializeWorksheets } from "$lib/services/googleSheets.js";
 import { sendRSVPConfirmation } from "$lib/services/email.js";
 
 export const load: PageServerLoad = async ({ cookies }) => {
@@ -78,8 +78,8 @@ export const actions = {
       console.log("Total Count:", validatedData.attendanceCount);
       console.log("============================\n");
 
-      // Initialize sheet headers (safe to call multiple times)
-      await initializeSheetHeaders();
+      // Initialize worksheets (safe to call multiple times)
+      await initializeWorksheets();
 
       // Store RSVP in Google Sheets
       await appendRSVPToSheet(validatedData);

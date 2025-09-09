@@ -1,6 +1,7 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { GOOGLE_SHEET_ID, GOOGLE_PRIVATE_KEY, GOOGLE_CLIENT_EMAIL } from '$env/static/private';
+import { weddingGuestList, type Guest } from './guestList.js';
 
 export interface RSVPData {
   primaryName: string;
@@ -48,9 +49,14 @@ export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
     console.log('📊 Attempting to append RSVP to Google Sheets...');
     
     const doc = await getGoogleSheet();
-    const sheet = doc.sheetsByIndex[0]; // Use first sheet
     
-    // Format the data for the sheet
+    // Get the RSVPs sheet
+    const rsvpSheet = doc.sheetsByTitle['RSVPs'];
+    if (!rsvpSheet) {
+      throw new Error('RSVPs sheet not found. Please run sheet initialization first.');
+    }
+    
+    // Format the data for the RSVPs sheet
     const timestamp = new Date().toISOString();
     const attendeeNamesString = rsvpData.attendeeNames.join(', ');
     const childrenNamesString = rsvpData.childrenNames.join(', ');
@@ -69,11 +75,14 @@ export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
       'Special Message': rsvpData.specialMessage
     };
 
-    // Add the row to the sheet
-    await sheet.addRow(rowData);
+    // Add the row to the RSVPs sheet
+    await rsvpSheet.addRow(rowData);
+    console.log('✅ Successfully added RSVP to RSVPs sheet');
 
-    console.log('✅ Successfully added RSVP to Google Sheets');
-    console.log('📋 Data:', { 
+    // Update the Invites sheet to mark attendees as having RSVPed
+    await updateInviteStatus(doc, rsvpData.attendeeNames);
+
+    console.log('📋 RSVP processing completed:', { 
       primaryName: rsvpData.primaryName, 
       email: rsvpData.email,
       attendanceCount: rsvpData.attendanceCount 
@@ -92,23 +101,69 @@ export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
   }
 }
 
-export async function initializeSheetHeaders(): Promise<void> {
+async function updateInviteStatus(doc: GoogleSpreadsheet, attendeeNames: string[]): Promise<void> {
   try {
-    console.log('🔧 Initializing Google Sheet headers...');
+    console.log('🔄 Updating invite status for attendees...');
+    
+    const invitesSheet = doc.sheetsByTitle['Invites'];
+    if (!invitesSheet) {
+      console.log('⚠️ Invites sheet not found, skipping status update');
+      return;
+    }
+
+    // Get all rows from the Invites sheet
+    const rows = await invitesSheet.getRows();
+    
+    // Update status for each attendee
+    for (const attendeeName of attendeeNames) {
+      const matchingRow = rows.find(row => 
+        row.get('Name') && row.get('Name').toLowerCase().trim() === attendeeName.toLowerCase().trim()
+      );
+      
+      if (matchingRow) {
+        matchingRow.set('RSVP Status', 'Confirmed');
+        await matchingRow.save();
+        console.log(`✅ Updated ${attendeeName} status to Confirmed`);
+      } else {
+        console.log(`⚠️ Could not find ${attendeeName} in Invites sheet`);
+      }
+    }
+    
+    console.log('✅ Invite status updates completed');
+  } catch (error) {
+    console.error('❌ Error updating invite status:', error);
+    // Don't throw here - RSVP was already saved successfully
+  }
+}
+
+export async function initializeWorksheets(): Promise<void> {
+  try {
+    console.log('🔧 Initializing Google Sheets worksheets...');
     
     const doc = await getGoogleSheet();
-    const sheet = doc.sheetsByIndex[0]; // Use first sheet
     
-    // Check if sheet has any data by looking at cell count
-    await sheet.loadCells('A1:K1'); // Load first row to check for headers
+    // Initialize RSVPs sheet
+    await initializeRSVPSheet(doc);
     
-    // Check if the first row has any values
-    const hasHeaders = sheet.getCellByA1('A1').value !== null;
+    // Initialize Invites sheet
+    await initializeInvitesSheet(doc);
     
-    if (!hasHeaders) {
-      // If no headers exist, set the header row
-      console.log('📝 Setting up headers for empty sheet...');
-      await sheet.setHeaderRow([
+    console.log('✅ All worksheets initialized successfully');
+  } catch (error) {
+    console.error('❌ Error initializing worksheets:', error);
+    throw error;
+  }
+}
+
+async function initializeRSVPSheet(doc: GoogleSpreadsheet): Promise<void> {
+  console.log('📝 Setting up RSVPs sheet...');
+  
+  // Find or create RSVPs sheet
+  let rsvpSheet = doc.sheetsByTitle['RSVPs'];
+  if (!rsvpSheet) {
+    rsvpSheet = await doc.addSheet({
+      title: 'RSVPs',
+      headerValues: [
         'Timestamp',
         'Primary Name',
         'Email',
@@ -120,13 +175,50 @@ export async function initializeSheetHeaders(): Promise<void> {
         'Favorite Coffee',
         'Favorite Song',
         'Special Message'
-      ]);
-      console.log('✅ Headers added to Google Sheet');
-    } else {
-      console.log('📋 Headers already exist in Google Sheet');
-    }
-  } catch (error) {
-    console.error('❌ Error initializing sheet headers:', error);
-    throw error;
+      ]
+    });
+    console.log('✅ RSVPs sheet created with headers');
+  } else {
+    console.log('📋 RSVPs sheet already exists');
   }
+}
+
+async function initializeInvitesSheet(doc: GoogleSpreadsheet): Promise<void> {
+  console.log('📝 Setting up Invites sheet...');
+  
+  // Find or create Invites sheet
+  let invitesSheet = doc.sheetsByTitle['Invites'];
+  if (!invitesSheet) {
+    invitesSheet = await doc.addSheet({
+      title: 'Invites',
+      headerValues: [
+        'Name',
+        'Category',
+        'Address',
+        'Notes',
+        'Invite Sent',
+        'RSVP Status'
+      ]
+    });
+    
+    // Add all guests to the Invites sheet
+    const guestRows = weddingGuestList.map(guest => ({
+      Name: guest.name,
+      Category: guest.category,
+      Address: guest.address || '',
+      Notes: guest.notes || '',
+      'Invite Sent': guest.inviteSent,
+      'RSVP Status': 'Pending'
+    }));
+    
+    await invitesSheet.addRows(guestRows);
+    console.log(`✅ Invites sheet created with ${weddingGuestList.length} guests`);
+  } else {
+    console.log('📋 Invites sheet already exists');
+  }
+}
+
+// Legacy function for backwards compatibility
+export async function initializeSheetHeaders(): Promise<void> {
+  return initializeWorksheets();
 }
