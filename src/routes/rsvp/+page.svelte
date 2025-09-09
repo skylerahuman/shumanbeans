@@ -290,26 +290,6 @@
                   Let Us Know
                 </h2>
 
-                <fieldset class="mb-4">
-                  <legend class="text-sm font-medium text-coffee-700 mb-2">
-                    Will you need parking?
-                  </legend>
-                  <div class="space-y-2">
-                    {#each [["yes", "Yes"], ["no", "No"], ["unsure", "I'm not sure yet"]] as [value, label]}
-                      <label class="flex items-center">
-                        <input
-                          type="radio"
-                          name="needsParking"
-                          {value}
-                          checked={form?.data?.needsParking === value}
-                          class="h-4 w-4 text-coffee-600 focus:ring-coffee-500 border-coffee-300"
-                        />
-                        <span class="ml-2 text-sm text-coffee-700">{label}</span
-                        >
-                      </label>
-                    {/each}
-                  </div>
-                </fieldset>
 
                 <div class="mb-4">
                   <label
@@ -390,6 +370,19 @@
                   />
                 </div>
               </section>
+
+              <!-- Contact Information Notice -->
+              <div class="bg-coffee-50 border border-coffee-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start gap-3">
+                  <div class="text-coffee-600 mt-1">
+                    <span class="text-lg">📱</span>
+                  </div>
+                  <div class="text-sm text-coffee-700">
+                    <p class="font-medium mb-1">Need help with your RSVP?</p>
+                    <p>If you submit an RSVP and don't receive a confirmation email within a few minutes, please text Skyler at <strong>423-370-6198</strong>.</p>
+                  </div>
+                </div>
+              </div>
 
               <!-- Submit Button -->
               <div class="text-center">

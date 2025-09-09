@@ -59,4 +59,5 @@ pids
 *.pid.lock
 
 # TypeScript cache
-*.tsbuildinfo 
+*.tsbuildinfo .env
+client_secret_*.json

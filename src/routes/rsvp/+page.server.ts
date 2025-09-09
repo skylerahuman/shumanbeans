@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { fail } from "@sveltejs/kit";
 import type { Actions } from "./$types";
+import { appendRSVPToSheet, initializeSheetHeaders } from "$lib/services/googleSheets.js";
+import { sendRSVPConfirmation } from "$lib/services/email.js";
 
 const rsvpSchema = z.object({
   primaryName: z.string().min(1, "Primary name is required"),
@@ -11,7 +13,6 @@ const rsvpSchema = z.object({
   attendanceCount: z.number().min(1, "Must have at least 1 attendee"),
   hasChildren: z.boolean(),
   childrenNames: z.array(z.string()),
-  needsParking: z.enum(["yes", "no", "unsure"]),
   dietaryRestrictions: z.string(),
   favoriteCoffee: z.string(),
   favoriteSong: z.string(),
@@ -34,7 +35,6 @@ export const actions = {
       childrenNames: formData
         .getAll("childrenNames")
         .filter((name) => name) as string[],
-      needsParking: formData.get("needsParking") as "yes" | "no" | "unsure",
       dietaryRestrictions:
         (formData.get("dietaryRestrictions") as string) || "",
       favoriteCoffee: (formData.get("favoriteCoffee") as string) || "",
@@ -45,32 +45,24 @@ export const actions = {
     try {
       const validatedData = rsvpSchema.parse(data);
 
-      // TODO: Store in database instead of just logging
       console.log("=== NEW RSVP SUBMISSION ===");
       console.log("Timestamp:", new Date().toISOString());
       console.log("Primary Contact:", validatedData.primaryName);
       console.log("Email:", validatedData.email);
       console.log("Attendees:", validatedData.attendeeNames);
       console.log("Total Count:", validatedData.attendanceCount);
-      console.log("Has Children:", validatedData.hasChildren);
-      if (validatedData.hasChildren && validatedData.childrenNames.length > 0) {
-        console.log("Children:", validatedData.childrenNames);
-      }
-      console.log("Parking Needed:", validatedData.needsParking);
-      console.log(
-        "Dietary Restrictions:",
-        validatedData.dietaryRestrictions || "None specified"
-      );
-      console.log(
-        "Favorite Coffee:",
-        validatedData.favoriteCoffee || "Not specified"
-      );
-      console.log(
-        "Favorite Song:",
-        validatedData.favoriteSong || "Not specified"
-      );
-      console.log("Special Message:", validatedData.specialMessage || "None");
       console.log("============================\n");
+
+      // Initialize sheet headers (safe to call multiple times)
+      await initializeSheetHeaders();
+
+      // Store RSVP in Google Sheets
+      await appendRSVPToSheet(validatedData);
+
+      // Send confirmation email
+      await sendRSVPConfirmation(validatedData);
+
+      console.log("✅ RSVP processing completed successfully");
 
       return {
         success: true,
@@ -78,16 +70,18 @@ export const actions = {
       };
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error("Validation errors:", error.issues);
+        console.error("❌ Validation errors:", error.issues);
         return fail(400, {
           errors: error.issues,
           data,
         });
       }
 
-      console.error("Unexpected error:", error);
+      console.error("❌ Unexpected error during RSVP processing:", error);
+      
+      // Return a user-friendly error message
       return fail(500, {
-        message: "An unexpected error occurred. Please try again.",
+        message: "We're having trouble processing your RSVP right now. Please try again, or text Skyler at 423-370-6198 if the problem persists.",
         data,
       });
     }
