@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import { fade, fly } from "svelte/transition";
   import ProductCard from "$lib/components/ProductCard.svelte";
+  import RegistryAdmin from "$lib/components/RegistryAdmin.svelte";
+  import { page } from '$app/stores';
 
   export let data;
 
@@ -12,6 +14,7 @@
   });
 
   $: amazonProducts = data.amazonProducts || [];
+  $: isAdmin = $page.data.isAdmin || false;
 </script>
 
 <svelte:head>
@@ -75,6 +78,9 @@
   <!-- Products Grid -->
   <section class="pb-16 px-4">
     <div class="max-w-7xl mx-auto">
+      <!-- Registry Admin Panel -->
+      <RegistryAdmin {isAdmin} />
+      
       <!-- Amazon Products Section -->
       <div class="mb-12">
           {#if mounted}
