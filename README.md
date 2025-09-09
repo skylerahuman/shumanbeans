@@ -53,9 +53,9 @@ The website maintains an elegant design palette suitable for a wedding celebrati
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- npm or yarn
+- npm (recommended package manager)
 
-### Installation
+### Local Development
 
 1. **Install dependencies:**
 
@@ -65,9 +65,10 @@ The website maintains an elegant design palette suitable for a wedding celebrati
 
 2. **Start the development server:**
    ```bash
-   npm run dev
+   npm run dev  # launches Vite on http://localhost:5173
    ```
-   The app will be available at `http://localhost:5173`
+   
+   The app will be available at `http://localhost:5173` with hot module replacement and live reload.
 
 ### Production Build
 
@@ -77,10 +78,33 @@ The website maintains an elegant design palette suitable for a wedding celebrati
    npm run build
    ```
 
-2. **Start the production server:**
+2. **Preview the production build:**
+   ```bash
+   npm run preview
+   ```
+
+3. **Start the production server:**
    ```bash
    npm start
    ```
+
+### Environment Setup
+
+1. **Copy the environment template:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Configure Google Sheets integration:**
+   - Create a Google Cloud project and enable Google Sheets API
+   - Create service account credentials and download JSON key
+   - Save as `google-service-account.json` in project root
+   - Share your Google Sheet with the service account email
+   - Add the Google Sheet ID to your `.env` file
+
+3. **Configure email service:**
+   - Sign up for [Resend](https://resend.com)
+   - Add your API key and FROM_EMAIL to `.env`
 
 ### Deployment (DigitalOcean)
 

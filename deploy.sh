@@ -41,16 +41,16 @@ fi
 
 # Install dependencies
 echo "📦 Installing application dependencies..."
-yarn install
+npm install
 
 # Build the application
 echo "🏗️  Building the application..."
-yarn build
+npm run build
 
 # Start application with PM2
 echo "🚀 Starting application with PM2..."
 pm2 delete shumanbeans 2>/dev/null || true  # Delete if exists
-pm2 start "yarn start" --name "shumanbeans"
+pm2 start "npm start" --name "shumanbeans"
 pm2 startup
 pm2 save
 

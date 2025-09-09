@@ -1,6 +1,7 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
-import { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_SHEET_ID } from '$env/static/private';
+import { readFile } from 'fs/promises';
+import { GOOGLE_SHEET_ID } from '$env/static/private';
 
 export interface RSVPData {
   primaryName: string;
@@ -16,17 +17,27 @@ export interface RSVPData {
 }
 
 async function getGoogleSheet() {
-  const serviceAccountAuth = new JWT({
-    email: GOOGLE_CLIENT_EMAIL,
-    key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    scopes: [
-      'https://www.googleapis.com/auth/spreadsheets',
-    ],
-  });
+  try {
+    // Try to read the service account JSON file
+    const serviceAccountPath = './google-service-account.json';
+    const serviceAccountJson = await readFile(serviceAccountPath, 'utf8');
+    const serviceAccount = JSON.parse(serviceAccountJson);
+    
+    const serviceAccountAuth = new JWT({
+      email: serviceAccount.client_email,
+      key: serviceAccount.private_key,
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets',
+      ],
+    });
 
-  const doc = new GoogleSpreadsheet(GOOGLE_SHEET_ID, serviceAccountAuth);
-  await doc.loadInfo();
-  return doc;
+    const doc = new GoogleSpreadsheet(GOOGLE_SHEET_ID, serviceAccountAuth);
+    await doc.loadInfo();
+    return doc;
+  } catch (error) {
+    console.error('❌ Error loading Google service account credentials:', error);
+    throw new Error('Google service account credentials not found or invalid. Please ensure google-service-account.json is properly configured.');
+  }
 }
 
 export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
