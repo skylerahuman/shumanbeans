@@ -2,6 +2,8 @@
   import "../app.css";
   import Nav from "$lib/components/Nav.svelte";
 
+  export let data;
+
   let innerWidth = 0;
   $: isMobile = innerWidth < 768;
 </script>
@@ -9,7 +11,7 @@
 <svelte:window bind:innerWidth />
 
 <div class="min-h-screen flex flex-col">
-  <Nav />
+  <Nav hasSubmittedRSVP={data.hasSubmittedRSVP} />
 
   <main class="flex-1 {isMobile ? 'pb-20' : ''}">
     <slot />
