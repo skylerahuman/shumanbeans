@@ -12,7 +12,6 @@
   });
 
   $: amazonProducts = data.amazonProducts || [];
-  $: hasError = data.error;
 </script>
 
 <svelte:head>
@@ -76,33 +75,8 @@
   <!-- Products Grid -->
   <section class="pb-16 px-4">
     <div class="max-w-7xl mx-auto">
-      {#if hasError}
-        <div class="text-center py-12">
-          <div
-            class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg max-w-md mx-auto"
-          >
-            <h3 class="font-semibold mb-2">Oops! Something went wrong</h3>
-            <p class="text-sm">
-              We're having trouble loading the registry items right now. Please
-              try again later or visit our registries directly.
-            </p>
-          </div>
-        </div>
-      {:else if amazonProducts.length === 0}
-        <div class="text-center py-12">
-          <div class="text-coffee-600 mb-4">
-            <span class="text-6xl block mb-4">🎁</span>
-            <h3 class="text-xl font-semibold mb-2">
-              Loading Registry Items...
-            </h3>
-            <p>
-              Please wait while we fetch the latest items from our registry.
-            </p>
-          </div>
-        </div>
-      {:else}
-        <!-- Amazon Products Section -->
-        <div class="mb-12">
+      <!-- Amazon Products Section -->
+      <div class="mb-12">
           {#if mounted}
             <div in:fly={{ y: 30, duration: 600, delay: 200 }}>
               <h2
@@ -115,69 +89,51 @@
               </p>
             </div>
           {/if}
+          
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {#each amazonProducts as product, index}
+            <ProductCard
+              title={product.title}
+              image={product.image}
+              price={product.price}
+              url={product.url}
+              source={product.source}
+              {index}
+            />
+          {/each}
+        </div>
+      </div>
 
-          <div
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
-            {#each amazonProducts as product, index}
-              <ProductCard
-                title={product.title}
-                image={product.image}
-                price={product.price}
-                url={product.url}
-                source={product.source}
-                {index}
-              />
-            {/each}
+      <!-- Coming Soon Sections -->
+      {#if mounted}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16" in:fade={{ duration: 600, delay: 800 }}>
+          <div class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200">
+            <div class="text-4xl mb-4">🏠</div>
+            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">Crate & Barrel</h3>
+            <p class="text-coffee-600 text-sm mb-4">
+              Elegant home decor and dining essentials
+            </p>
+            <p class="text-xs text-coffee-500">Coming Soon</p>
+          </div>
+          
+          <div class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200">
+            <div class="text-4xl mb-4">🔨</div>
+            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">Home Depot</h3>
+            <p class="text-coffee-600 text-sm mb-4">
+              Tools and home improvement essentials
+            </p>
+            <p class="text-xs text-coffee-500">Coming Soon</p>
+          </div>
+          
+          <div class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200">
+            <div class="text-4xl mb-4">🎯</div>
+            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">Target</h3>
+            <p class="text-coffee-600 text-sm mb-4">
+              Everyday essentials and home basics
+            </p>
+            <p class="text-xs text-coffee-500">Coming Soon</p>
           </div>
         </div>
-
-        <!-- Coming Soon Sections -->
-        {#if mounted}
-          <div
-            class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16"
-            in:fade={{ duration: 600, delay: 800 }}
-          >
-            <div
-              class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200"
-            >
-              <div class="text-4xl mb-4">🏠</div>
-              <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">
-                Crate & Barrel
-              </h3>
-              <p class="text-coffee-600 text-sm mb-4">
-                Elegant home decor and dining essentials
-              </p>
-              <p class="text-xs text-coffee-500">Coming Soon</p>
-            </div>
-
-            <div
-              class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200"
-            >
-              <div class="text-4xl mb-4">🔨</div>
-              <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">
-                Home Depot
-              </h3>
-              <p class="text-coffee-600 text-sm mb-4">
-                Tools and home improvement essentials
-              </p>
-              <p class="text-xs text-coffee-500">Coming Soon</p>
-            </div>
-
-            <div
-              class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200"
-            >
-              <div class="text-4xl mb-4">🎯</div>
-              <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">
-                Target
-              </h3>
-              <p class="text-coffee-600 text-sm mb-4">
-                Everyday essentials and home basics
-              </p>
-              <p class="text-xs text-coffee-500">Coming Soon</p>
-            </div>
-          </div>
-        {/if}
       {/if}
     </div>
   </section>
