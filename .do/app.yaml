@@ -17,3 +17,13 @@ services:
     envs:
       - key: NODE_ENV
         value: production
+      - key: GOOGLE_SHEET_ID
+        value: SET_IN_DO_CONSOLE
+      - key: GOOGLE_CLIENT_EMAIL  
+        value: SET_IN_DO_CONSOLE
+      - key: GOOGLE_PRIVATE_KEY
+        value: SET_IN_DO_CONSOLE
+      - key: RESEND_API_KEY
+        value: SET_IN_DO_CONSOLE
+      - key: FROM_EMAIL
+        value: SET_IN_DO_CONSOLE
