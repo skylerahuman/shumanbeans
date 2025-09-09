@@ -99,11 +99,15 @@ export async function initializeSheetHeaders(): Promise<void> {
     const doc = await getGoogleSheet();
     const sheet = doc.sheetsByIndex[0]; // Use first sheet
     
-    // Load the header row to check if headers exist
-    const rows = await sheet.getRows({ limit: 1 });
+    // Check if sheet has any data by looking at cell count
+    await sheet.loadCells('A1:K1'); // Load first row to check for headers
     
-    if (rows.length === 0) {
-      // If no rows exist, set the header row
+    // Check if the first row has any values
+    const hasHeaders = sheet.getCellByA1('A1').value !== null;
+    
+    if (!hasHeaders) {
+      // If no headers exist, set the header row
+      console.log('📝 Setting up headers for empty sheet...');
       await sheet.setHeaderRow([
         'Timestamp',
         'Primary Name',
