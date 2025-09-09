@@ -66,17 +66,30 @@
       <!-- Success Message -->
       <div class="text-center" in:fade={{ duration: 600 }}>
         <div
-          class="bg-green-100 border border-green-400 text-green-700 px-8 py-12 rounded-lg mb-8"
+          class="bg-gradient-to-br from-coffee-50 to-cream-100 border-2 border-coffee-300 text-coffee-800 px-8 py-12 rounded-xl mb-8 shadow-lg"
         >
-          <div class="text-6xl mb-4">🎉</div>
-          <h2 class="text-2xl font-serif font-bold mb-4">Thank You!</h2>
-          <p class="text-lg">
-            We've received your RSVP and can't wait to celebrate with you on
-            November 22nd!
+          <div class="text-7xl mb-6">🎉</div>
+          <h2 class="text-3xl font-serif font-bold mb-6 text-coffee-800">Thank You!</h2>
+          <p class="text-lg mb-6 leading-relaxed">
+            We've received your RSVP and are absolutely thrilled that you'll be joining us for our special day!
           </p>
-          <p class="text-sm mt-4 text-green-600">
-            You should receive a confirmation email shortly with all the wedding
-            details.
+          
+          <!-- Wedding Details Card -->
+          <div class="bg-white p-6 rounded-lg border border-coffee-200 mb-6 mx-auto max-w-md">
+            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-4">Save the Date</h3>
+            <div class="text-coffee-700 space-y-2">
+              <p class="text-lg font-medium">📅 <strong>November 22nd, 2025</strong></p>
+              <p class="text-base">🕐 <strong>Arrive by 2:00 PM</strong></p>
+              <p class="text-base">💒 <strong>Ceremony starts at 2:30 PM</strong></p>
+            </div>
+          </div>
+          
+          <p class="text-sm text-coffee-600 mb-4">
+            You should receive a confirmation email shortly with all the wedding details and venue information.
+          </p>
+          
+          <p class="text-coffee-700 font-medium">
+            We can't wait to celebrate with you! ☕💕
           </p>
         </div>
 
