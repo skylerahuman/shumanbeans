@@ -1,7 +1,6 @@
-import { google } from 'googleapis';
-import { GOOGLE_SHEETS_API_KEY, GOOGLE_SHEET_ID } from '$env/static/private';
-
-const sheets = google.sheets('v4');
+import { GoogleSpreadsheet } from 'google-spreadsheet';
+import { JWT } from 'google-auth-library';
+import { GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_SHEET_ID } from '$env/static/private';
 
 export interface RSVPData {
   primaryName: string;
@@ -16,55 +15,55 @@ export interface RSVPData {
   specialMessage: string;
 }
 
+async function getGoogleSheet() {
+  const serviceAccountAuth = new JWT({
+    email: GOOGLE_CLIENT_EMAIL,
+    key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    scopes: [
+      'https://www.googleapis.com/auth/spreadsheets',
+    ],
+  });
+
+  const doc = new GoogleSpreadsheet(GOOGLE_SHEET_ID, serviceAccountAuth);
+  await doc.loadInfo();
+  return doc;
+}
+
 export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
   try {
     console.log('📊 Attempting to append RSVP to Google Sheets...');
+    
+    const doc = await getGoogleSheet();
+    const sheet = doc.sheetsByIndex[0]; // Use first sheet
     
     // Format the data for the sheet
     const timestamp = new Date().toISOString();
     const attendeeNamesString = rsvpData.attendeeNames.join(', ');
     const childrenNamesString = rsvpData.childrenNames.join(', ');
     
-    const rowData = [
-      timestamp,
-      rsvpData.primaryName,
-      rsvpData.email,
-      attendeeNamesString,
-      rsvpData.attendanceCount.toString(),
-      rsvpData.hasChildren ? 'Yes' : 'No',
-      childrenNamesString,
-      rsvpData.dietaryRestrictions,
-      rsvpData.favoriteCoffee,
-      rsvpData.favoriteSong,
-      rsvpData.specialMessage
-    ];
+    const rowData = {
+      Timestamp: timestamp,
+      'Primary Name': rsvpData.primaryName,
+      Email: rsvpData.email,
+      'Attendee Names': attendeeNamesString,
+      'Total Attendance Count': rsvpData.attendanceCount,
+      'Has Children': rsvpData.hasChildren ? 'Yes' : 'No',
+      'Children Names': childrenNamesString,
+      'Dietary Restrictions': rsvpData.dietaryRestrictions,
+      'Favorite Coffee': rsvpData.favoriteCoffee,
+      'Favorite Song': rsvpData.favoriteSong,
+      'Special Message': rsvpData.specialMessage
+    };
 
-    // Set up authentication
-    google.options({
-      auth: GOOGLE_SHEETS_API_KEY
+    // Add the row to the sheet
+    await sheet.addRow(rowData);
+
+    console.log('✅ Successfully added RSVP to Google Sheets');
+    console.log('📋 Data:', { 
+      primaryName: rsvpData.primaryName, 
+      email: rsvpData.email,
+      attendanceCount: rsvpData.attendanceCount 
     });
-
-    // Append data to the sheet
-    const result = await sheets.spreadsheets.values.append({
-      spreadsheetId: GOOGLE_SHEET_ID,
-      range: 'A:K', // Columns A through K
-      valueInputOption: 'RAW',
-      insertDataOption: 'INSERT_ROWS',
-      requestBody: {
-        values: [rowData]
-      }
-    });
-
-    if (result.status === 200) {
-      console.log('✅ Successfully added RSVP to Google Sheets');
-      console.log('📋 Data:', { 
-        primaryName: rsvpData.primaryName, 
-        email: rsvpData.email,
-        attendanceCount: rsvpData.attendanceCount 
-      });
-    } else {
-      throw new Error(`Unexpected response status: ${result.status}`);
-    }
   } catch (error) {
     console.error('❌ Error adding RSVP to Google Sheets:', error);
     
@@ -83,40 +82,27 @@ export async function initializeSheetHeaders(): Promise<void> {
   try {
     console.log('🔧 Initializing Google Sheet headers...');
     
-    const headers = [
-      'Timestamp',
-      'Primary Name',
-      'Email',
-      'Attendee Names',
-      'Total Attendance Count',
-      'Has Children',
-      'Children Names',
-      'Dietary Restrictions',
-      'Favorite Coffee',
-      'Favorite Song',
-      'Special Message'
-    ];
-
-    google.options({
-      auth: GOOGLE_SHEETS_API_KEY
-    });
-
-    // Check if headers already exist
-    const existingData = await sheets.spreadsheets.values.get({
-      spreadsheetId: GOOGLE_SHEET_ID,
-      range: 'A1:K1'
-    });
-
-    if (!existingData.data.values || existingData.data.values.length === 0) {
-      // Add headers if they don't exist
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: GOOGLE_SHEET_ID,
-        range: 'A1:K1',
-        valueInputOption: 'RAW',
-        requestBody: {
-          values: [headers]
-        }
-      });
+    const doc = await getGoogleSheet();
+    const sheet = doc.sheetsByIndex[0]; // Use first sheet
+    
+    // Load the header row to check if headers exist
+    const rows = await sheet.getRows({ limit: 1 });
+    
+    if (rows.length === 0) {
+      // If no rows exist, set the header row
+      await sheet.setHeaderRow([
+        'Timestamp',
+        'Primary Name',
+        'Email',
+        'Attendee Names',
+        'Total Attendance Count',
+        'Has Children',
+        'Children Names',
+        'Dietary Restrictions',
+        'Favorite Coffee',
+        'Favorite Song',
+        'Special Message'
+      ]);
       console.log('✅ Headers added to Google Sheet');
     } else {
       console.log('📋 Headers already exist in Google Sheet');
