@@ -114,7 +114,7 @@ export const actions = {
       // Initialize worksheets (safe to call multiple times)
       await initializeWorksheets();
 
-      // Store RSVP in Google Sheets
+      // Store RSVP in Google Sheets (includes duplicate checking)
       await appendRSVPToSheet(validatedData);
 
       // Send confirmation email

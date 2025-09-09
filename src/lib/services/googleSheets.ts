@@ -44,6 +44,41 @@ async function getGoogleSheet() {
   }
 }
 
+export async function checkDuplicateRSVP(email: string, primaryName: string): Promise<boolean> {
+  try {
+    console.log(`🔍 Checking for duplicate RSVP: ${email}`);
+    
+    const doc = await getGoogleSheet();
+    const rsvpSheet = doc.sheetsByTitle['RSVPs'];
+    
+    if (!rsvpSheet) {
+      return false; // No sheet means no duplicates
+    }
+    
+    // Get all rows to check for duplicates
+    const rows = await rsvpSheet.getRows();
+    
+    // Check for duplicate email or primary name
+    const duplicate = rows.find(row => {
+      const rowEmail = row.get('Email')?.toLowerCase().trim();
+      const rowName = row.get('Primary Name')?.toLowerCase().trim();
+      return rowEmail === email.toLowerCase().trim() || 
+             rowName === primaryName.toLowerCase().trim();
+    });
+    
+    if (duplicate) {
+      console.log(`⚠️ Duplicate RSVP found for: ${email}`);
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('❌ Error checking duplicate RSVP:', error);
+    // On error, allow submission to proceed
+    return false;
+  }
+}
+
 export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
   try {
     console.log('📊 Attempting to append RSVP to Google Sheets...');
@@ -54,6 +89,12 @@ export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
     const rsvpSheet = doc.sheetsByTitle['RSVPs'];
     if (!rsvpSheet) {
       throw new Error('RSVPs sheet not found. Please run sheet initialization first.');
+    }
+    
+    // Check for duplicate RSVP
+    const isDuplicate = await checkDuplicateRSVP(rsvpData.email, rsvpData.primaryName);
+    if (isDuplicate) {
+      throw new Error(`An RSVP has already been submitted for ${rsvpData.email} or ${rsvpData.primaryName}. Please contact us if you need to make changes.`);
     }
     
     // Format the data for the RSVPs sheet
@@ -79,10 +120,21 @@ export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
     await rsvpSheet.addRow(rowData);
     console.log('✅ Successfully added RSVP to RSVPs sheet');
 
-    // Update the Invites sheet to mark attendees as having RSVPed
-    await updateInviteStatus(doc, rsvpData.attendeeNames);
+    // Update the Invites sheet to mark attendees as having RSVPed (with timeout)
+    try {
+      const updatePromise = updateInviteStatus(doc, rsvpData.attendeeNames);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Invite status update timeout')), 10000)
+      );
+      
+      await Promise.race([updatePromise, timeoutPromise]);
+    } catch (error) {
+      console.warn('⚠️ Invite status update failed, but RSVP was saved:', error);
+      // Don't throw here - RSVP was successfully saved
+    }
 
-    console.log('📋 RSVP processing completed:', { 
+    console.log('📋 RSVP processing completed successfully');
+    console.log('Details:', { 
       primaryName: rsvpData.primaryName, 
       email: rsvpData.email,
       attendanceCount: rsvpData.attendanceCount 
@@ -103,7 +155,7 @@ export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
 
 async function updateInviteStatus(doc: GoogleSpreadsheet, attendeeNames: string[]): Promise<void> {
   try {
-    console.log('🔄 Updating invite status for attendees...');
+    console.log(`🔄 Updating invite status for ${attendeeNames.length} attendees...`);
     
     const invitesSheet = doc.sheetsByTitle['Invites'];
     if (!invitesSheet) {
@@ -111,28 +163,55 @@ async function updateInviteStatus(doc: GoogleSpreadsheet, attendeeNames: string[
       return;
     }
 
-    // Get all rows from the Invites sheet
-    const rows = await invitesSheet.getRows();
+    // Get all rows from the Invites sheet with timeout
+    const rowsPromise = invitesSheet.getRows();
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout getting invite rows')), 5000)
+    );
     
-    // Update status for each attendee
-    for (const attendeeName of attendeeNames) {
-      const matchingRow = rows.find(row => 
-        row.get('Name') && row.get('Name').toLowerCase().trim() === attendeeName.toLowerCase().trim()
-      );
-      
-      if (matchingRow) {
-        matchingRow.set('RSVP Status', 'Confirmed');
-        await matchingRow.save();
-        console.log(`✅ Updated ${attendeeName} status to Confirmed`);
-      } else {
-        console.log(`⚠️ Could not find ${attendeeName} in Invites sheet`);
+    const rows = await Promise.race([rowsPromise, timeoutPromise]) as any[];
+    console.log(`📁 Retrieved ${rows.length} invite rows`);
+    
+    // Update status for each attendee (with individual timeouts)
+    const updatePromises = attendeeNames.map(async (attendeeName) => {
+      try {
+        const matchingRow = rows.find(row => {
+          const rowName = row.get('Name');
+          return rowName && rowName.toLowerCase().trim() === attendeeName.toLowerCase().trim();
+        });
+        
+        if (matchingRow) {
+          matchingRow.set('RSVP Status', 'Confirmed');
+          
+          // Save with timeout
+          const savePromise = matchingRow.save();
+          const saveTimeout = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error(`Timeout saving ${attendeeName}`)), 3000)
+          );
+          
+          await Promise.race([savePromise, saveTimeout]);
+          console.log(`✅ Updated ${attendeeName} status to Confirmed`);
+        } else {
+          console.log(`⚠️ Could not find ${attendeeName} in Invites sheet`);
+        }
+      } catch (error) {
+        console.error(`❌ Failed to update ${attendeeName}:`, error);
       }
-    }
+    });
     
+    // Wait for all updates with overall timeout
+    const allUpdatesPromise = Promise.all(updatePromises);
+    const overallTimeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Overall timeout for invite updates')), 8000)
+    );
+    
+    await Promise.race([allUpdatesPromise, overallTimeout]);
     console.log('✅ Invite status updates completed');
+    
   } catch (error) {
     console.error('❌ Error updating invite status:', error);
     // Don't throw here - RSVP was already saved successfully
+    throw error; // Re-throw to be caught by the parent timeout handler
   }
 }
 
