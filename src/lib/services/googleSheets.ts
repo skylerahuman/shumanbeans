@@ -13,7 +13,7 @@ export interface RSVPData {
   dietaryRestrictions: string;
   favoriteCoffee: string;
   favoriteSong: string;
-  specialMessage: string;
+  specialMessage?: string;
 }
 
 async function getGoogleSheet() {
@@ -48,33 +48,62 @@ export async function checkDuplicateRSVP(email: string, primaryName: string): Pr
   try {
     console.log(`🔍 Checking for duplicate RSVP: ${email}`);
     
-    const doc = await getGoogleSheet();
-    const rsvpSheet = doc.sheetsByTitle['RSVPs'];
+    // Add timeout to the entire duplicate check process
+    const duplicateCheckPromise = async () => {
+      const doc = await getGoogleSheet();
+      const rsvpSheet = doc.sheetsByTitle['RSVPs'];
+      
+      if (!rsvpSheet) {
+        console.log('⚠️ RSVPs sheet not found, assuming no duplicates');
+        return false; // No sheet means no duplicates
+      }
+      
+      // Get all rows to check for duplicates with explicit timeout
+      console.log('📊 Fetching existing RSVP rows...');
+      const rows = await rsvpSheet.getRows();
+      console.log(`📁 Retrieved ${rows.length} existing RSVP rows`);
+      
+      // Handle empty sheet case
+      if (!rows || rows.length === 0) {
+        console.log('📄 No existing RSVPs found, no duplicates possible');
+        return false;
+      }
+      
+      // Check for duplicate email or primary name
+      const duplicate = rows.find(row => {
+        try {
+          const rowEmail = row.get('Email')?.toLowerCase().trim();
+          const rowName = row.get('Primary Name')?.toLowerCase().trim();
+          return rowEmail === email.toLowerCase().trim() || 
+                 rowName === primaryName.toLowerCase().trim();
+        } catch (rowError) {
+          console.warn('⚠️ Error reading row data:', rowError);
+          return false;
+        }
+      });
+      
+      if (duplicate) {
+        console.log(`⚠️ Duplicate RSVP found for: ${email}`);
+        return true;
+      }
+      
+      console.log('✅ No duplicate RSVP found');
+      return false;
+    };
     
-    if (!rsvpSheet) {
-      return false; // No sheet means no duplicates
-    }
+    // Add 8-second timeout to prevent hanging
+    const timeoutPromise = new Promise<boolean>((_, reject) => 
+      setTimeout(() => reject(new Error('Duplicate check timeout after 8 seconds')), 8000)
+    );
     
-    // Get all rows to check for duplicates
-    const rows = await rsvpSheet.getRows();
+    return await Promise.race([duplicateCheckPromise(), timeoutPromise]);
     
-    // Check for duplicate email or primary name
-    const duplicate = rows.find(row => {
-      const rowEmail = row.get('Email')?.toLowerCase().trim();
-      const rowName = row.get('Primary Name')?.toLowerCase().trim();
-      return rowEmail === email.toLowerCase().trim() || 
-             rowName === primaryName.toLowerCase().trim();
-    });
-    
-    if (duplicate) {
-      console.log(`⚠️ Duplicate RSVP found for: ${email}`);
-      return true;
-    }
-    
-    return false;
   } catch (error) {
     console.error('❌ Error checking duplicate RSVP:', error);
-    // On error, allow submission to proceed
+    if (error instanceof Error && error.message.includes('timeout')) {
+      console.error('⏰ Duplicate check timed out - allowing submission to proceed');
+    }
+    // On error or timeout, allow submission to proceed
     return false;
   }
 }
@@ -113,7 +142,7 @@ export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
       'Dietary Restrictions': rsvpData.dietaryRestrictions,
       'Favorite Coffee': rsvpData.favoriteCoffee,
       'Favorite Song': rsvpData.favoriteSong,
-      'Special Message': rsvpData.specialMessage
+      'Special Message': rsvpData.specialMessage || ''
     };
 
     // Add the row to the RSVPs sheet

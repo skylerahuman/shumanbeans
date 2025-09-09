@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import { appendRSVPToSheet, initializeWorksheets } from "$lib/services/googleSheets.js";
+import { appendRSVPToSheet, initializeWorksheets } from '$lib/services/googleSheets';
+import { sendRSVPConfirmationEmail, type RSVPEmailData } from '$lib/services/emailService';
 import { sendRSVPConfirmation } from "$lib/services/email.js";
 
 export const load: PageServerLoad = async ({ cookies }) => {
@@ -118,7 +119,16 @@ export const actions = {
       await appendRSVPToSheet(validatedData);
 
       // Send confirmation email
-      await sendRSVPConfirmation(validatedData);
+      const emailData: RSVPEmailData = {
+        primaryName: validatedData.primaryName,
+        email: validatedData.email,
+        attending: 'yes', // All RSVPs submitted are "yes" - no decline option on this form
+        dietaryRestrictions: validatedData.dietaryRestrictions,
+        guestCount: validatedData.attendanceCount,
+        plusOneDetails: validatedData.attendeeNames.slice(1).join(', '), // Additional attendees beyond primary
+        message: validatedData.specialMessage
+      };
+      await sendRSVPConfirmationEmail(emailData);
 
       console.log("✅ RSVP processing completed successfully");
 
