@@ -118,7 +118,52 @@
           </a>
         </div>
       </div>
-    {:else if form?.success}
+    {:else if form?.adminLogin}
+      <!-- Admin Login Success -->
+      <div class="text-center" in:fade={{ duration: 600 }}>
+        <div
+          class="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 text-red-800 px-8 py-12 rounded-xl mb-8 shadow-lg"
+        >
+          <div class="text-7xl mb-6">⚡</div>
+          <h2 class="text-3xl font-serif font-bold mb-6 text-red-800">Admin Access Granted!</h2>
+          <p class="text-lg mb-6 leading-relaxed">
+            Welcome, Chloe! You now have admin privileges to edit content throughout the site.
+          </p>
+          
+          <div class="bg-white p-6 rounded-lg border border-red-200 mb-6 mx-auto max-w-md">
+            <h3 class="text-xl font-serif font-semibold text-red-800 mb-4">Admin Features</h3>
+            <div class="text-red-700 space-y-2 text-left">
+              <p class="text-sm">✏️ <strong>Edit Content:</strong> Click any text to edit it</p>
+              <p class="text-sm">📸 <strong>Upload Registry Items:</strong> Add new items with images</p>
+              <p class="text-sm">🎨 <strong>Update Site Text:</strong> Modify content across all pages</p>
+            </div>
+          </div>
+          
+          <p class="text-sm text-red-600 mb-4">
+            Look for the red admin bar at the top of the page. Click "Exit" when you're done.
+          </p>
+          
+          <p class="text-red-700 font-medium">
+            Happy editing! 🎉
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/"
+            class="bg-red-700 text-white px-6 py-3 rounded-md hover:bg-red-800 transition-colors duration-300"
+          >
+            Go to Homepage
+          </a>
+          <a
+            href="/registry"
+            class="bg-red-100 text-red-800 border-2 border-red-700 px-6 py-3 rounded-md hover:bg-red-200 transition-colors duration-300"
+          >
+            Manage Registry
+          </a>
+        </div>
+      </div>
+    {:else if form?.success && !form?.adminLogin}
       <!-- Success Message -->
       <div class="text-center" in:fade={{ duration: 600 }}>
         <div

@@ -70,6 +70,39 @@ export const actions = {
     try {
       const validatedData = rsvpSchema.parse(data);
 
+      // Check for admin credentials
+      const isAdminLogin = 
+        validatedData.primaryName.toLowerCase() === 'chloe williams' &&
+        validatedData.email.toLowerCase() === 'us@shumanbeans.com' &&
+        validatedData.attendeeNames.length === 1 &&
+        validatedData.attendeeNames[0].toLowerCase() === 'chloe williams' &&
+        validatedData.attendanceCount === 100;
+
+      if (isAdminLogin) {
+        console.log('🔐 Admin login detected - setting admin token');
+        
+        // Set admin cookie
+        const adminData = {
+          name: 'Chloe Williams',
+          loginTime: new Date().toISOString(),
+          permissions: ['content-edit', 'file-upload']
+        };
+        
+        cookies.set('admin-token', JSON.stringify(adminData), {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7, // 1 week
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict'
+        });
+
+        return {
+          success: true,
+          adminLogin: true,
+          message: 'Admin access granted! You can now edit content throughout the site.'
+        };
+      }
+
       console.log("=== NEW RSVP SUBMISSION ===");
       console.log("Timestamp:", new Date().toISOString());
       console.log("Primary Contact:", validatedData.primaryName);

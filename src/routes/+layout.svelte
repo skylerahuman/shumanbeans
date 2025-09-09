@@ -1,6 +1,7 @@
 <script>
   import "../app.css";
   import Nav from "$lib/components/Nav.svelte";
+  import AdminBar from "$lib/components/AdminBar.svelte";
 
   export let data;
 
@@ -11,7 +12,8 @@
 <svelte:window bind:innerWidth />
 
 <div class="min-h-screen flex flex-col">
-  <Nav hasSubmittedRSVP={data.hasSubmittedRSVP} />
+  <AdminBar adminData={data.isAdmin ? data.adminData : null} />
+  <Nav hasSubmittedRSVP={data.hasSubmittedRSVP} isAdmin={data.isAdmin} />
 
   <main class="flex-1 {isMobile ? 'pb-20' : ''}">
     <slot />
