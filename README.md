@@ -98,7 +98,8 @@ The website maintains an elegant design palette suitable for a wedding celebrati
 2. **Configure Google Sheets integration:**
    - Create a Google Cloud project and enable Google Sheets API
    - Create service account credentials and download JSON key
-   - Save as `google-service-account.json` in project root
+   - Extract `client_email` and `private_key` from the JSON file
+   - Add these values to your `.env` file as `GOOGLE_CLIENT_EMAIL` and `GOOGLE_PRIVATE_KEY`
    - Share your Google Sheet with the service account email
    - Add the Google Sheet ID to your `.env` file
 

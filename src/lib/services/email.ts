@@ -116,7 +116,8 @@ export async function sendRSVPConfirmation(rsvpData: RSVPData): Promise<void> {
             <div class="wedding-info">
               <h2>Wedding Details</h2>
               <p><strong>Date:</strong> November 22, 2025</p>
-              <p><strong>Time:</strong> 2:30 PM</p>
+              <p><strong>Arrival:</strong> Please arrive by 2:00 PM</p>
+              <p><strong>Ceremony:</strong> Begins at 2:30 PM</p>
               <p><strong>Location:</strong> Details to follow</p>
               <p><em>Formal invitation with venue details will be sent separately</em></p>
             </div>
@@ -163,7 +164,8 @@ ${rsvpData.dietaryRestrictions ? `- Dietary Notes: ${rsvpData.dietaryRestriction
 
 Wedding Details:
 Date: November 22, 2025
-Time: 2:30 PM
+Arrival: Please arrive by 2:00 PM
+Ceremony: Begins at 2:30 PM
 Location: Details to follow
 
 Formal invitation with venue details will be sent separately.
