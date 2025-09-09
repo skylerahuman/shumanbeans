@@ -13,7 +13,7 @@ export interface RSVPData {
   dietaryRestrictions: string;
   favoriteCoffee: string;
   favoriteSong: string;
-  specialMessage: string;
+  specialMessage?: string;
 }
 
 async function getGoogleSheet() {
@@ -113,7 +113,7 @@ export async function appendRSVPToSheet(rsvpData: RSVPData): Promise<void> {
       'Dietary Restrictions': rsvpData.dietaryRestrictions,
       'Favorite Coffee': rsvpData.favoriteCoffee,
       'Favorite Song': rsvpData.favoriteSong,
-      'Special Message': rsvpData.specialMessage
+      'Special Message': rsvpData.specialMessage || ''
     };
 
     // Add the row to the RSVPs sheet
