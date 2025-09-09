@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
 
   export let form;
+  export let data;
 
   let mounted = false;
   let attendeeNames = [""];
@@ -62,7 +63,62 @@
   </section>
 
   <div class="max-w-2xl mx-auto py-16 px-4 md:px-6">
-    {#if form?.success}
+    {#if data.hasSubmittedRSVP}
+      <!-- Already Submitted RSVP Information -->
+      <div class="text-center" in:fade={{ duration: 600 }}>
+        <div
+          class="bg-gradient-to-br from-coffee-50 to-cream-100 border-2 border-coffee-300 text-coffee-800 px-8 py-12 rounded-xl mb-8 shadow-lg"
+        >
+          <div class="text-6xl mb-6">📝</div>
+          <h2 class="text-3xl font-serif font-bold mb-6 text-coffee-800">RSVP Information</h2>
+          <p class="text-lg mb-6 leading-relaxed">
+            Hi {data.submissionData.primaryName}! We have your RSVP on file.
+          </p>
+          
+          <!-- RSVP Details Card -->
+          <div class="bg-white p-6 rounded-lg border border-coffee-200 mb-6 mx-auto max-w-md">
+            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-4">Your RSVP Details</h3>
+            <div class="text-coffee-700 space-y-2">
+              <p class="text-base">👥 <strong>{data.submissionData.attendanceCount} Guest{data.submissionData.attendanceCount > 1 ? 's' : ''}</strong></p>
+              <p class="text-sm">📅 Submitted: {new Date(data.submissionData.submittedAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+          
+          <!-- Wedding Details Card -->
+          <div class="bg-white p-6 rounded-lg border border-coffee-200 mb-6 mx-auto max-w-md">
+            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-4">Wedding Details</h3>
+            <div class="text-coffee-700 space-y-2">
+              <p class="text-lg font-medium">📅 <strong>November 22nd, 2025</strong></p>
+              <p class="text-base">🕐 <strong>Arrive by 2:00 PM</strong></p>
+              <p class="text-base">💒 <strong>Ceremony starts at 2:30 PM</strong></p>
+            </div>
+          </div>
+          
+          <p class="text-sm text-coffee-600 mb-4">
+            Need to make changes to your RSVP? Please text Skyler at <strong>423-370-6198</strong>.
+          </p>
+          
+          <p class="text-coffee-700 font-medium">
+            We can't wait to celebrate with you! ☕💕
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/story"
+            class="bg-coffee-700 text-cream-100 px-6 py-3 rounded-md hover:bg-coffee-800 transition-colors duration-300"
+          >
+            Read Our Story
+          </a>
+          <a
+            href="/registry"
+            class="bg-coffee-100 text-coffee-800 border-2 border-coffee-700 px-6 py-3 rounded-md hover:bg-coffee-200 transition-colors duration-300"
+          >
+            View Registry
+          </a>
+        </div>
+      </div>
+    {:else if form?.success}
       <!-- Success Message -->
       <div class="text-center" in:fade={{ duration: 600 }}>
         <div

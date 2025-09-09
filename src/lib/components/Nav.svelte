@@ -1,14 +1,16 @@
 <script>
   import { page } from "$app/stores";
 
+  export let hasSubmittedRSVP = false;
+
   let innerWidth = 0;
   $: isMobile = innerWidth < 768;
 
-  const navItems = [
+  $: navItems = [
     { href: "/", label: "Home", icon: "🏠" },
     { href: "/story", label: "Our Story", icon: "💕" },
     { href: "/registry", label: "Registry", icon: "🎁" },
-    { href: "/rsvp", label: "RSVP", icon: "✉️" },
+    { href: "/rsvp", label: hasSubmittedRSVP ? "RSVP Info" : "RSVP", icon: hasSubmittedRSVP ? "📝" : "✉️" },
   ];
 
   $: currentPath = $page.url.pathname;

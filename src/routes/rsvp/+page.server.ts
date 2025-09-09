@@ -1,8 +1,33 @@
 import { z } from "zod";
 import { fail } from "@sveltejs/kit";
-import type { Actions } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 import { appendRSVPToSheet, initializeSheetHeaders } from "$lib/services/googleSheets.js";
 import { sendRSVPConfirmation } from "$lib/services/email.js";
+
+export const load: PageServerLoad = async ({ cookies }) => {
+  const rsvpSubmission = cookies.get('rsvp-submitted');
+  
+  if (rsvpSubmission) {
+    try {
+      const submissionData = JSON.parse(rsvpSubmission);
+      return {
+        hasSubmittedRSVP: true,
+        submissionData: {
+          primaryName: submissionData.primaryName,
+          submittedAt: submissionData.submittedAt,
+          attendanceCount: submissionData.attendanceCount
+        }
+      };
+    } catch (error) {
+      // If cookie is corrupted, clear it
+      cookies.delete('rsvp-submitted');
+    }
+  }
+  
+  return {
+    hasSubmittedRSVP: false
+  };
+};
 
 const rsvpSchema = z.object({
   primaryName: z.string().min(1, "Primary name is required"),
@@ -20,7 +45,7 @@ const rsvpSchema = z.object({
 });
 
 export const actions = {
-  default: async ({ request }) => {
+  default: async ({ request, cookies }) => {
     const formData = await request.formData();
 
     // Parse form data
@@ -63,6 +88,22 @@ export const actions = {
       await sendRSVPConfirmation(validatedData);
 
       console.log("✅ RSVP processing completed successfully");
+
+      // Set cookie to track RSVP submission (expires in 1 year)
+      const submissionData = {
+        primaryName: validatedData.primaryName,
+        email: validatedData.email,
+        submittedAt: new Date().toISOString(),
+        attendanceCount: validatedData.attendanceCount
+      };
+      
+      cookies.set('rsvp-submitted', JSON.stringify(submissionData), {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365, // 1 year
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
 
       return {
         success: true,
