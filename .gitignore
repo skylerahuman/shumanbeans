@@ -61,3 +61,4 @@ pids
 # TypeScript cache
 *.tsbuildinfo .env
 client_secret_*.json
+google-service-account.json
