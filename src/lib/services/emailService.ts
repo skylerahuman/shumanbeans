@@ -1,16 +1,29 @@
 import { Resend } from 'resend';
 import { RESEND_API_KEY, FROM_EMAIL } from '$env/static/private';
 
-// Initialize Resend client with error handling
+// Initialize Resend client with error handling and production debugging
 let resend: Resend;
 try {
+  console.log('🔧 Initializing Resend client...');
+  
   if (!RESEND_API_KEY) {
     throw new Error('RESEND_API_KEY environment variable is not set');
   }
   if (!FROM_EMAIL) {
     throw new Error('FROM_EMAIL environment variable is not set');
   }
+  
+  // Log configuration (without exposing sensitive data)
+  console.log('📧 Email service configuration:', {
+    hasApiKey: !!RESEND_API_KEY,
+    apiKeyLength: RESEND_API_KEY?.length,
+    apiKeyPrefix: RESEND_API_KEY?.substring(0, 8) + '...',
+    fromEmail: FROM_EMAIL,
+    timestamp: new Date().toISOString()
+  });
+  
   resend = new Resend(RESEND_API_KEY);
+  console.log('✅ Resend client initialized successfully');
 } catch (error) {
   console.error('❌ Failed to initialize Resend client:', error);
   throw error;
@@ -39,13 +52,23 @@ function isValidEmail(email: string): boolean {
  * Follows Resend best practices for error handling and response processing
  */
 export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promise<void> {
+  console.log('🚀 Starting RSVP email send process...', {
+    recipient: rsvpData.email,
+    primaryName: rsvpData.primaryName,
+    timestamp: new Date().toISOString()
+  });
+
   // Validate input data
   if (!rsvpData.email || !isValidEmail(rsvpData.email)) {
-    throw new Error(`Invalid email address: ${rsvpData.email}`);
+    const error = `Invalid email address: ${rsvpData.email}`;
+    console.error('❌ Email validation failed:', error);
+    throw new Error(error);
   }
   
   if (!rsvpData.primaryName?.trim()) {
-    throw new Error('Primary name is required for email sending');
+    const error = 'Primary name is required for email sending';
+    console.error('❌ Name validation failed:', error);
+    throw new Error(error);
   }
 
   const isAttending = rsvpData.attending.toLowerCase() === 'yes';
@@ -53,14 +76,28 @@ export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promis
     ? `RSVP Confirmed - We can't wait to celebrate with you!`
     : `RSVP Received - Thank you for letting us know`;
 
+  console.log('📝 Generating email content...', {
+    isAttending,
+    subject,
+    hasHtml: true,
+    hasText: true
+  });
+
   const htmlContent = generateRSVPEmailHTML(rsvpData, isAttending);
   const textContent = generateRSVPEmailText(rsvpData, isAttending);
 
-  console.log(`📧 Attempting to send email to: ${rsvpData.email} from: ${FROM_EMAIL}`);
+  console.log('📧 Preparing to send email via Resend API...', {
+    from: `Skyler & Chloe <${FROM_EMAIL}>`,
+    to: rsvpData.email,
+    subject,
+    htmlLength: htmlContent.length,
+    textLength: textContent.length,
+    timestamp: new Date().toISOString()
+  });
   
   try {
     // Use Resend API with both HTML and text content for better deliverability
-    const response = await resend.emails.send({
+    const emailPayload = {
       from: `Skyler & Chloe <${FROM_EMAIL}>`,
       to: [rsvpData.email],
       subject,
@@ -75,16 +112,40 @@ export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promis
       headers: {
         'X-Entity-Ref-ID': `rsvp-${Date.now()}-${rsvpData.email.replace('@', '-at-')}`
       }
+    };
+
+    console.log('🔄 Calling Resend API...', {
+      payloadKeys: Object.keys(emailPayload),
+      timestamp: new Date().toISOString()
+    });
+
+    const response = await resend.emails.send(emailPayload);
+
+    console.log('📨 Resend API response received:', {
+      hasData: !!response.data,
+      hasError: !!response.error,
+      dataKeys: response.data ? Object.keys(response.data) : [],
+      timestamp: new Date().toISOString()
     });
 
     // Handle Resend API response according to their documentation
     if (response.error) {
-      console.error('❌ Resend API error:', response.error);
+      console.error('❌ Resend API returned error:', {
+        error: response.error,
+        errorType: typeof response.error,
+        errorKeys: typeof response.error === 'object' ? Object.keys(response.error) : [],
+        timestamp: new Date().toISOString()
+      });
       throw new Error(`Resend API error: ${response.error.message || JSON.stringify(response.error)}`);
     }
 
     if (!response.data?.id) {
-      console.error('❌ Unexpected Resend response format:', response);
+      console.error('❌ Unexpected Resend response format:', {
+        response,
+        hasData: !!response.data,
+        dataType: typeof response.data,
+        timestamp: new Date().toISOString()
+      });
       throw new Error('Email sent but no message ID received from Resend');
     }
 
@@ -92,17 +153,26 @@ export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promis
       messageId: response.data.id,
       to: rsvpData.email,
       subject,
-      attending: isAttending
+      attending: isAttending,
+      timestamp: new Date().toISOString()
     });
     
   } catch (error) {
     // Enhanced error logging with context
-    console.error('❌ Email service error:', {
+    const errorDetails = {
       error: error instanceof Error ? error.message : String(error),
+      errorType: typeof error,
+      errorName: error instanceof Error ? error.name : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined,
       recipient: rsvpData.email,
       primaryName: rsvpData.primaryName,
+      fromEmail: FROM_EMAIL,
+      hasApiKey: !!RESEND_API_KEY,
+      apiKeyLength: RESEND_API_KEY?.length,
       timestamp: new Date().toISOString()
-    });
+    };
+
+    console.error('❌ Email service error details:', errorDetails);
     
     // Re-throw with additional context for upstream handling
     if (error instanceof Error) {

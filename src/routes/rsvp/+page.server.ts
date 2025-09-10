@@ -54,11 +54,24 @@ const rsvpSchema = z.object({
 
 /**
  * Enhanced async email sending with proper error handling and logging
- * Uses Promise-based approach instead of setImmediate for better compatibility
+ * Uses Promise-based approach with timeout protection for production environments
  */
 async function sendEmailAsync(emailData: RSVPEmailData): Promise<{ success: boolean; error?: string }> {
   try {
-    await sendRSVPConfirmationEmail(emailData);
+    console.log('📧 Starting email send process...', {
+      recipient: emailData.email,
+      primaryName: emailData.primaryName,
+      timestamp: new Date().toISOString()
+    });
+
+    // Add timeout protection for production environments
+    const emailPromise = sendRSVPConfirmationEmail(emailData);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Email sending timeout after 30 seconds')), 30000);
+    });
+
+    await Promise.race([emailPromise, timeoutPromise]);
+    
     console.log('✅ RSVP confirmation email sent successfully (async)');
     return { success: true };
   } catch (error) {
@@ -69,7 +82,9 @@ async function sendEmailAsync(emailData: RSVPEmailData): Promise<{ success: bool
     console.error('📧 Email context:', {
       recipient: emailData.email,
       primaryName: emailData.primaryName,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined
     });
     
     return { success: false, error: errorMessage };
@@ -77,13 +92,39 @@ async function sendEmailAsync(emailData: RSVPEmailData): Promise<{ success: bool
 }
 
 /**
- * Creates a detached Promise that won't block the main response
- * More reliable than setImmediate and works in all environments
+ * Sends email with proper await to ensure completion before response
+ * This prevents serverless/production environments from terminating before email sends
  */
-function scheduleAsyncEmail(emailData: RSVPEmailData): void {
-  // Use Promise.resolve().then() to schedule on next tick
-  // This is more portable than setImmediate and works in all JS environments
-  Promise.resolve().then(() => sendEmailAsync(emailData));
+async function sendEmailWithFallback(emailData: RSVPEmailData): Promise<{ success: boolean; error?: string }> {
+  try {
+    console.log('📧 Attempting synchronous email send for production reliability...');
+    
+    // Try to send email synchronously with timeout
+    const result = await Promise.race([
+      sendEmailAsync(emailData),
+      new Promise<{ success: boolean; error?: string }>((resolve) => {
+        setTimeout(() => resolve({ success: false, error: 'Email timeout - will retry async' }), 10000);
+      })
+    ]);
+
+    if (result.success) {
+      console.log('✅ Email sent successfully (synchronous)');
+      return result;
+    } else {
+      console.log('⚠️ Synchronous email failed, scheduling async retry...');
+      // Schedule async retry but don't wait for it
+      Promise.resolve().then(() => sendEmailAsync(emailData));
+      return result;
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Email sending failed completely:', errorMessage);
+    
+    // Still try async as last resort
+    Promise.resolve().then(() => sendEmailAsync(emailData));
+    
+    return { success: false, error: errorMessage };
+  }
 }
 
 export const actions = {
@@ -226,11 +267,26 @@ export const actions = {
       message: validatedData.specialMessage
     };
     
-    // Schedule email sending asynchronously (non-blocking)
-    // This ensures RSVP completion is not dependent on email service availability
-    scheduleAsyncEmail(emailData);
+    // Try to send email with fallback strategy for production reliability
+    // This attempts synchronous send first, then falls back to async if needed
+    let emailResult = { success: false, error: 'Not attempted' };
     
-    console.log('📧 Email confirmation scheduled for async delivery');
+    try {
+      console.log('📧 Attempting email send with production-safe strategy...');
+      emailResult = await sendEmailWithFallback(emailData);
+      
+      if (emailResult.success) {
+        console.log('✅ Email confirmation sent successfully');
+      } else {
+        console.log('⚠️ Email confirmation failed but RSVP was successful:', emailResult.error);
+      }
+    } catch (error) {
+      console.error('❌ Email sending encountered unexpected error:', error);
+      emailResult = { 
+        success: false, 
+        error: error instanceof Error ? error.message : String(error) 
+      };
+    }
 
     // Set cookie to track RSVP submission (expires in 1 year)
     const submissionData = {
@@ -248,10 +304,17 @@ export const actions = {
       sameSite: 'strict'
     });
 
-    // Redirect to success page
-    // Note: We always show email as "sent" since RSVP was successful
-    // The actual email delivery happens asynchronously and is logged separately
-    const params = new URLSearchParams({ emailSent: 'true' });
+    // Redirect to success page with actual email status
+    const params = new URLSearchParams();
+    
+    if (emailResult.success) {
+      params.set('emailSent', 'true');
+      console.log('🎉 RSVP completed successfully with email confirmation');
+    } else {
+      params.set('emailSent', 'false');
+      params.set('emailError', 'true');
+      console.log('🎉 RSVP completed successfully (email failed but will retry)');
+    }
     
     throw redirect(303, `/rsvp/success?${params.toString()}`);
   },
