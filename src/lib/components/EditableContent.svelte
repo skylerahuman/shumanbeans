@@ -101,7 +101,6 @@
       on:keydown={handleKeydown}
       class="w-full min-h-[100px] p-3 border-2 border-blue-500 rounded-lg bg-white text-black resize-y font-inherit"
       placeholder="Enter your content here..."
-      {/* autofocus */}
     ></textarea>
     <div class="flex gap-2 mt-3">
       <button
