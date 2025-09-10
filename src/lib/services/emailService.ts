@@ -1,7 +1,20 @@
 import { Resend } from 'resend';
 import { RESEND_API_KEY, FROM_EMAIL } from '$env/static/private';
 
-const resend = new Resend(RESEND_API_KEY);
+// Initialize Resend client with error handling
+let resend: Resend;
+try {
+  if (!RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY environment variable is not set');
+  }
+  if (!FROM_EMAIL) {
+    throw new Error('FROM_EMAIL environment variable is not set');
+  }
+  resend = new Resend(RESEND_API_KEY);
+} catch (error) {
+  console.error('❌ Failed to initialize Resend client:', error);
+  throw error;
+}
 
 export interface RSVPEmailData {
   primaryName: string;
@@ -13,39 +26,139 @@ export interface RSVPEmailData {
   message?: string;
 }
 
+/**
+ * Validates email address format
+ */
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+/**
+ * Sends RSVP confirmation email using Resend API
+ * Follows Resend best practices for error handling and response processing
+ */
 export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promise<void> {
+  // Validate input data
+  if (!rsvpData.email || !isValidEmail(rsvpData.email)) {
+    throw new Error(`Invalid email address: ${rsvpData.email}`);
+  }
+  
+  if (!rsvpData.primaryName?.trim()) {
+    throw new Error('Primary name is required for email sending');
+  }
+
   const isAttending = rsvpData.attending.toLowerCase() === 'yes';
   const subject = isAttending 
     ? `RSVP Confirmed - We can't wait to celebrate with you!`
     : `RSVP Received - Thank you for letting us know`;
 
   const htmlContent = generateRSVPEmailHTML(rsvpData, isAttending);
+  const textContent = generateRSVPEmailText(rsvpData, isAttending);
 
   console.log(`📧 Attempting to send email to: ${rsvpData.email} from: ${FROM_EMAIL}`);
   
-  // Follow Resend sample pattern exactly
   try {
-    const { data, error } = await resend.emails.send({
+    // Use Resend API with both HTML and text content for better deliverability
+    const response = await resend.emails.send({
       from: `Skyler & Chloe <${FROM_EMAIL}>`,
       to: [rsvpData.email],
       subject,
       html: htmlContent,
+      text: textContent, // Include plain text version for better deliverability
+      // Add tags for tracking and analytics
+      tags: [
+        { name: 'type', value: 'rsvp-confirmation' },
+        { name: 'attending', value: isAttending ? 'yes' : 'no' }
+      ],
+      // Add headers for better email client handling
+      headers: {
+        'X-Entity-Ref-ID': `rsvp-${Date.now()}-${rsvpData.email.replace('@', '-at-')}`
+      }
     });
 
-    if (error) {
-      console.error('❌ Resend API error:', error);
-      throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
+    // Handle Resend API response according to their documentation
+    if (response.error) {
+      console.error('❌ Resend API error:', response.error);
+      throw new Error(`Resend API error: ${response.error.message || JSON.stringify(response.error)}`);
+    }
+
+    if (!response.data?.id) {
+      console.error('❌ Unexpected Resend response format:', response);
+      throw new Error('Email sent but no message ID received from Resend');
     }
 
     console.log('✅ RSVP confirmation email sent successfully:', {
-      messageId: data?.id,
-      to: rsvpData.email
+      messageId: response.data.id,
+      to: rsvpData.email,
+      subject,
+      attending: isAttending
     });
     
   } catch (error) {
-    console.error('❌ Email service error:', error);
-    throw error; // Re-throw for handling by async wrapper
+    // Enhanced error logging with context
+    console.error('❌ Email service error:', {
+      error: error instanceof Error ? error.message : String(error),
+      recipient: rsvpData.email,
+      primaryName: rsvpData.primaryName,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Re-throw with additional context for upstream handling
+    if (error instanceof Error) {
+      throw new Error(`Failed to send RSVP confirmation email: ${error.message}`);
+    }
+    throw new Error(`Failed to send RSVP confirmation email: ${String(error)}`);
   }
+}
+
+/**
+ * Generates plain text version of the RSVP email for better deliverability
+ */
+function generateRSVPEmailText(rsvpData: RSVPEmailData, isAttending: boolean): string {
+  const attendingMessage = isAttending 
+    ? '🎉 Wonderful! We\'re so excited you can join us!'
+    : 'We\'re sorry you can\'t make it, but thank you for letting us know.';
+
+  const rsvpDetails = [
+    `Primary Contact: ${rsvpData.primaryName}`,
+    `Email: ${rsvpData.email}`,
+    `Total Guests: ${rsvpData.guestCount}`,
+    rsvpData.plusOneDetails ? `Additional Attendees: ${rsvpData.plusOneDetails}` : '',
+    rsvpData.dietaryRestrictions ? `Dietary Restrictions: ${rsvpData.dietaryRestrictions}` : '',
+    rsvpData.message ? `Special Message: ${rsvpData.message}` : ''
+  ].filter(Boolean).join('\n');
+
+  const nextSteps = isAttending 
+    ? `What's Next?
+We'll be sending out more details about the ceremony and reception as we get closer to the big day. Keep an eye on your inbox!
+
+If you need to make any changes to your RSVP, please contact us directly.`
+    : 'If your plans change and you\'re able to attend, please let us know as soon as possible.';
+
+  return `
+Skyler & Chloe
+Thank you for your RSVP!
+
+Dear ${rsvpData.primaryName},
+
+Thank you for responding to our wedding invitation! We've received your RSVP and wanted to send you this confirmation.
+
+${attendingMessage}
+
+Your RSVP Details:
+${rsvpDetails}
+
+${nextSteps}
+
+With love and excitement,
+Skyler & Chloe
+
+Need help? If you have any questions or need to make changes to your RSVP, please contact us at ${FROM_EMAIL}
+
+The Shumanbeans Wedding
+"Two hearts, one journey, endless coffee"
+  `.trim();
 }
 
 function generateRSVPEmailHTML(rsvpData: RSVPEmailData, isAttending: boolean): string {

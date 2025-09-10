@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { fail, redirect } from "@sveltejs/kit";
+import { dev } from "$app/environment";
 import type { Actions, PageServerLoad } from "./$types";
 import { appendRSVPToSheet, initializeWorksheets } from '$lib/services/googleSheets';
 import { sendRSVPConfirmationEmail, type RSVPEmailData } from '$lib/services/emailService';
-import { sendRSVPConfirmation } from "$lib/services/email.js";
 
 export const load: PageServerLoad = async ({ cookies }) => {
   const rsvpSubmission = cookies.get('rsvp-submitted');
@@ -52,6 +52,40 @@ const rsvpSchema = z.object({
   specialMessage: z.string().optional(),
 });
 
+/**
+ * Enhanced async email sending with proper error handling and logging
+ * Uses Promise-based approach instead of setImmediate for better compatibility
+ */
+async function sendEmailAsync(emailData: RSVPEmailData): Promise<{ success: boolean; error?: string }> {
+  try {
+    await sendRSVPConfirmationEmail(emailData);
+    console.log('✅ RSVP confirmation email sent successfully (async)');
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('⚠️ Email failed (RSVP still successful):', errorMessage);
+    
+    // Log additional context for debugging
+    console.error('📧 Email context:', {
+      recipient: emailData.email,
+      primaryName: emailData.primaryName,
+      timestamp: new Date().toISOString()
+    });
+    
+    return { success: false, error: errorMessage };
+  }
+}
+
+/**
+ * Creates a detached Promise that won't block the main response
+ * More reliable than setImmediate and works in all environments
+ */
+function scheduleAsyncEmail(emailData: RSVPEmailData): void {
+  // Use Promise.resolve().then() to schedule on next tick
+  // This is more portable than setImmediate and works in all JS environments
+  Promise.resolve().then(() => sendEmailAsync(emailData));
+}
+
 export const actions = {
   default: async ({ request, cookies }) => {
     const formData = await request.formData();
@@ -60,21 +94,21 @@ export const actions = {
     const rawEmail = formData.get("email") as string;
     
     const data = {
-      primaryName: (formData.get("primaryName") as string)?.trim() || "",
-      email: rawEmail?.trim() || "", // Trim whitespace from email
+      primaryName: ((formData.get("primaryName") as string) || "").trim(),
+      email: (rawEmail || "").trim(), // Trim whitespace from email
       attendeeNames: formData
         .getAll("attendeeNames")
-        .filter((name) => name && name.trim()) as string[],
-      attendanceCount: parseInt(formData.get("attendanceCount") as string) || 0,
+        .filter((name) => name && typeof name === 'string' && name.trim()) as string[],
+      attendanceCount: parseInt((formData.get("attendanceCount") as string) || "0") || 0,
       hasChildren: formData.get("hasChildren") === "on",
       childrenNames: formData
         .getAll("childrenNames")
-        .filter((name) => name && name.trim()) as string[],
+        .filter((name) => name && typeof name === 'string' && name.trim()) as string[],
       dietaryRestrictions:
-        (formData.get("dietaryRestrictions") as string)?.trim() || "",
-      favoriteCoffee: (formData.get("favoriteCoffee") as string)?.trim() || "",
-      favoriteSong: (formData.get("favoriteSong") as string)?.trim() || "",
-      specialMessage: (formData.get("specialMessage") as string)?.trim() || "",
+        ((formData.get("dietaryRestrictions") as string) || "").trim(),
+      favoriteCoffee: ((formData.get("favoriteCoffee") as string) || "").trim(),
+      favoriteSong: ((formData.get("favoriteSong") as string) || "").trim(),
+      specialMessage: ((formData.get("specialMessage") as string) || "").trim(),
     };
     
     // Debug email validation
@@ -133,7 +167,7 @@ export const actions = {
         path: '/',
         maxAge: 60 * 60 * 24 * 7, // 1 week
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: !dev,
         sameSite: 'strict'
       });
 
@@ -160,7 +194,7 @@ export const actions = {
       // Store RSVP in Google Sheets (includes duplicate checking)
       await appendRSVPToSheet(validatedData);
 
-      console.log("\u2705 RSVP processing completed successfully");
+      console.log("✅ RSVP processing completed successfully");
     } catch (error) {
       // Handle duplicate RSVP error specially
       if (error instanceof Error && error.message.includes('RSVP has already been submitted')) {
@@ -181,11 +215,7 @@ export const actions = {
       });
     }
 
-    // Track whether email was sent successfully
-    let emailSent = false;
-    let emailError = null;
-    
-    // Send confirmation email (completely non-blocking - fire and forget)
+    // Prepare email data for confirmation
     const emailData: RSVPEmailData = {
       primaryName: validatedData.primaryName,
       email: validatedData.email,
@@ -196,19 +226,11 @@ export const actions = {
       message: validatedData.specialMessage
     };
     
-    // Completely async email sending - spawn separate process to avoid any blocking
-    // This ensures RSVP completes regardless of email service status
-    setImmediate(async () => {
-      try {
-        await sendRSVPConfirmationEmail(emailData);
-        console.log('\u2705 RSVP confirmation email sent successfully (async)');
-      } catch (error) {
-        console.error('\u26a0\ufe0f Email failed (RSVP still successful):', error.message || error);
-      }
-    });
+    // Schedule email sending asynchronously (non-blocking)
+    // This ensures RSVP completion is not dependent on email service availability
+    scheduleAsyncEmail(emailData);
     
-    // Always show email sent status since RSVP was successful
-    emailSent = true; // We'll show success message since RSVP was successful
+    console.log('📧 Email confirmation scheduled for async delivery');
 
     // Set cookie to track RSVP submission (expires in 1 year)
     const submissionData = {
@@ -222,17 +244,14 @@ export const actions = {
       path: '/',
       maxAge: 60 * 60 * 24 * 365, // 1 year
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: !dev,
       sameSite: 'strict'
     });
 
-    // Redirect to success page with email status (this is now outside any try-catch)
-    const params = new URLSearchParams();
-    if (emailSent) {
-      params.set('emailSent', 'true');
-    } else if (emailError) {
-      params.set('emailError', 'true');
-    }
+    // Redirect to success page
+    // Note: We always show email as "sent" since RSVP was successful
+    // The actual email delivery happens asynchronously and is logged separately
+    const params = new URLSearchParams({ emailSent: 'true' });
     
     throw redirect(303, `/rsvp/success?${params.toString()}`);
   },
