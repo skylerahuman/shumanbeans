@@ -288,9 +288,16 @@
                       id="email"
                       name="email"
                       required
+                      autocomplete="email"
+                      spellcheck="false"
                       value={form?.data?.email || ""}
+                      on:blur={(e) => {
+                        // Clean up email input on blur
+                        e.target.value = e.target.value.trim().toLowerCase();
+                      }}
                       class="w-full px-4 py-2 border border-coffee-300 rounded-md focus:ring-2 focus:ring-coffee-500 focus:border-coffee-500 transition-colors"
                       placeholder="your@email.com"
+                      title="Please enter a valid email address (e.g., user@gmail.com)"
                     />
                     {#if hasError("email")}
                       <p class="text-red-600 text-sm mt-1">

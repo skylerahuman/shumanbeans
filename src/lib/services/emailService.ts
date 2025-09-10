@@ -21,7 +21,9 @@ export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promis
 
   const htmlContent = generateRSVPEmailHTML(rsvpData, isAttending);
 
-  // Add timeout to email sending (10 seconds max)
+  console.log(`📧 Attempting to send email to: ${rsvpData.email} from: ${FROM_EMAIL}`);
+  
+  // Normal timeout for email sending
   const emailPromise = resend.emails.send({
     from: `Skyler & Chloe <${FROM_EMAIL}>`,
     to: [rsvpData.email],
@@ -34,25 +36,53 @@ export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promis
   );
   
   try {
-    const { data, error } = await Promise.race([emailPromise, timeoutPromise]) as any;
+    const result = await Promise.race([emailPromise, timeoutPromise]);
+    const { data, error } = result as any;
     
     if (error) {
-      console.error('Resend API error:', error);
+      console.error('📧 Resend API error details:', {
+        error,
+        errorMessage: error.message,
+        errorType: typeof error,
+        email: rsvpData.email,
+        fromEmail: FROM_EMAIL
+      });
+      
+      // Check for common domain verification issues
+      if (error.message && error.message.includes('not verified')) {
+        throw new Error(`Domain verification error: ${FROM_EMAIL.split('@')[1]} needs to be verified in Resend`);
+      }
+      
       throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
     }
     
-    console.log('RSVP confirmation email sent successfully:', data?.id);
+    console.log('✅ RSVP confirmation email sent successfully:', {
+      messageId: data?.id,
+      to: rsvpData.email,
+      from: FROM_EMAIL
+    });
     
   } catch (error) {
-    console.error('Failed to send RSVP confirmation email:', error);
+    console.error('❌ Failed to send RSVP confirmation email:', {
+      error: error instanceof Error ? error.message : error,
+      email: rsvpData.email,
+      from: FROM_EMAIL,
+      timestamp: new Date().toISOString()
+    });
     
     // Provide more detailed error information
     if (error instanceof Error) {
-      if (error.message.includes('domain is not verified')) {
-        throw new Error(`Email domain not verified. Please verify ${FROM_EMAIL.split('@')[1]} in Resend dashboard.`);
+      if (error.message.includes('domain') && error.message.includes('verified')) {
+        throw new Error(`Email sending failed: Domain ${FROM_EMAIL.split('@')[1]} is not verified in Resend. Only verified domains can send emails.`);
       }
       if (error.message.includes('timeout')) {
-        throw new Error('Email service timeout - please try again later.');
+        throw new Error('Email service timed out. This may be due to domain verification issues or rate limits.');
+      }
+      if (error.message.includes('403') || error.message.includes('unauthorized')) {
+        throw new Error('Email service authentication failed. Check RESEND_API_KEY.');
+      }
+      if (error.message.includes('422')) {
+        throw new Error('Email service validation error. The email address may be invalid or the domain unverified.');
       }
       throw new Error(`Email service error: ${error.message}`);
     }

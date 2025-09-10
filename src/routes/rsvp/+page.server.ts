@@ -32,7 +32,14 @@ export const load: PageServerLoad = async ({ cookies }) => {
 
 const rsvpSchema = z.object({
   primaryName: z.string().min(1, "Primary name is required"),
-  email: z.string().email("Please enter a valid email address"),
+  email: z.string()
+    .min(1, "Email address is required")
+    .email("Please enter a valid email address (e.g., user@gmail.com)")
+    .refine((email) => {
+      // Additional email validation to catch edge cases
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }, "Please enter a valid email address (e.g., user@gmail.com)"),
   attendeeNames: z
     .array(z.string().min(1))
     .min(1, "At least one attendee name is required"),
@@ -50,23 +57,33 @@ export const actions = {
     const formData = await request.formData();
 
     // Parse form data
+    const rawEmail = formData.get("email") as string;
+    
     const data = {
-      primaryName: formData.get("primaryName") as string,
-      email: formData.get("email") as string,
+      primaryName: (formData.get("primaryName") as string)?.trim() || "",
+      email: rawEmail?.trim() || "", // Trim whitespace from email
       attendeeNames: formData
         .getAll("attendeeNames")
-        .filter((name) => name) as string[],
+        .filter((name) => name && name.trim()) as string[],
       attendanceCount: parseInt(formData.get("attendanceCount") as string) || 0,
       hasChildren: formData.get("hasChildren") === "on",
       childrenNames: formData
         .getAll("childrenNames")
-        .filter((name) => name) as string[],
+        .filter((name) => name && name.trim()) as string[],
       dietaryRestrictions:
-        (formData.get("dietaryRestrictions") as string) || "",
-      favoriteCoffee: (formData.get("favoriteCoffee") as string) || "",
-      favoriteSong: (formData.get("favoriteSong") as string) || "",
-      specialMessage: (formData.get("specialMessage") as string) || "",
+        (formData.get("dietaryRestrictions") as string)?.trim() || "",
+      favoriteCoffee: (formData.get("favoriteCoffee") as string)?.trim() || "",
+      favoriteSong: (formData.get("favoriteSong") as string)?.trim() || "",
+      specialMessage: (formData.get("specialMessage") as string)?.trim() || "",
     };
+    
+    // Debug email validation
+    console.log('📧 Email validation debug:', {
+      rawEmail: JSON.stringify(rawEmail),
+      trimmedEmail: JSON.stringify(data.email),
+      emailLength: data.email?.length,
+      emailType: typeof data.email
+    });
 
     let validatedData;
     
@@ -75,6 +92,17 @@ export const actions = {
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error("❌ Validation errors:", error.issues);
+        
+        // Log detailed email validation errors
+        const emailErrors = error.issues.filter(issue => issue.path.includes('email'));
+        if (emailErrors.length > 0) {
+          console.error('📧 Email validation failed:', {
+            email: data.email,
+            emailErrors: emailErrors.map(e => ({ message: e.message, code: e.code })),
+            rawEmailFromForm: rawEmail
+          });
+        }
+        
         return fail(400, {
           errors: error.issues,
           data,
@@ -157,7 +185,7 @@ export const actions = {
     let emailSent = false;
     let emailError = null;
     
-    // Send confirmation email (non-blocking - don't fail RSVP if email fails)
+    // Send confirmation email (completely non-blocking - fire and forget)
     const emailData: RSVPEmailData = {
       primaryName: validatedData.primaryName,
       email: validatedData.email,
@@ -168,16 +196,17 @@ export const actions = {
       message: validatedData.specialMessage
     };
     
-    // Send email in background - don't block RSVP success
-    try {
-      await sendRSVPConfirmationEmail(emailData);
-      console.log('\u2705 RSVP confirmation email sent successfully');
-      emailSent = true;
-    } catch (error) {
-      console.error('\u26a0\ufe0f Failed to send RSVP confirmation email (RSVP still successful):', error);
-      emailError = error instanceof Error ? error.message : 'Unknown email error';
-      // Don't throw - allow RSVP to succeed even if email fails
-    }
+    // Fire-and-forget email sending - don't wait for completion
+    sendRSVPConfirmationEmail(emailData)
+      .then(() => {
+        console.log('\u2705 RSVP confirmation email sent successfully (async)');
+      })
+      .catch((error) => {
+        console.error('\u26a0\ufe0f Failed to send RSVP confirmation email (RSVP still successful):', error);
+      });
+    
+    // Always assume email sending is in progress
+    emailSent = true; // We'll show success message since RSVP was successful
 
     // Set cookie to track RSVP submission (expires in 1 year)
     const submissionData = {
