@@ -196,16 +196,18 @@ export const actions = {
       message: validatedData.specialMessage
     };
     
-    // Fire-and-forget email sending - don't wait for completion
-    sendRSVPConfirmationEmail(emailData)
-      .then(() => {
+    // Completely async email sending - spawn separate process to avoid any blocking
+    // This ensures RSVP completes regardless of email service status
+    setImmediate(async () => {
+      try {
+        await sendRSVPConfirmationEmail(emailData);
         console.log('\u2705 RSVP confirmation email sent successfully (async)');
-      })
-      .catch((error) => {
-        console.error('\u26a0\ufe0f Failed to send RSVP confirmation email (RSVP still successful):', error);
-      });
+      } catch (error) {
+        console.error('\u26a0\ufe0f Email failed (RSVP still successful):', error.message || error);
+      }
+    });
     
-    // Always assume email sending is in progress
+    // Always show email sent status since RSVP was successful
     emailSent = true; // We'll show success message since RSVP was successful
 
     // Set cookie to track RSVP submission (expires in 1 year)
