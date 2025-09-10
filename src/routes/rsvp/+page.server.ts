@@ -68,108 +68,10 @@ export const actions = {
       specialMessage: (formData.get("specialMessage") as string) || "",
     };
 
+    let validatedData;
+    
     try {
-      const validatedData = rsvpSchema.parse(data);
-
-      // Check for admin credentials
-      const isAdminLogin = 
-        validatedData.primaryName.toLowerCase() === 'chloe williams' &&
-        validatedData.email.toLowerCase() === 'us@shumanbeans.com' &&
-        validatedData.attendeeNames.length === 1 &&
-        validatedData.attendeeNames[0].toLowerCase() === 'chloe williams' &&
-        validatedData.attendanceCount === 100;
-
-      if (isAdminLogin) {
-        console.log('🔐 Admin login detected - setting admin token');
-        
-        // Set admin cookie
-        const adminData = {
-          name: 'Chloe Williams',
-          loginTime: new Date().toISOString(),
-          permissions: ['content-edit', 'file-upload']
-        };
-        
-        cookies.set('admin-token', JSON.stringify(adminData), {
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7, // 1 week
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict'
-        });
-
-        return {
-          success: true,
-          adminLogin: true,
-          message: 'Admin access granted! You can now edit content throughout the site.'
-        };
-      }
-
-      console.log("=== NEW RSVP SUBMISSION ===");
-      console.log("Timestamp:", new Date().toISOString());
-      console.log("Primary Contact:", validatedData.primaryName);
-      console.log("Email:", validatedData.email);
-      console.log("Attendees:", validatedData.attendeeNames);
-      console.log("Total Count:", validatedData.attendanceCount);
-      console.log("============================\n");
-
-      // Initialize worksheets (safe to call multiple times)
-      await initializeWorksheets();
-
-      // Store RSVP in Google Sheets (includes duplicate checking)
-      await appendRSVPToSheet(validatedData);
-
-      console.log("\u2705 RSVP processing completed successfully");
-      // Track whether email was sent successfully
-      let emailSent = false;
-      let emailError = null;
-      
-      // Send confirmation email (non-blocking - don't fail RSVP if email fails)
-      const emailData: RSVPEmailData = {
-        primaryName: validatedData.primaryName,
-        email: validatedData.email,
-        attending: 'yes', // All RSVPs submitted are "yes" - no decline option on this form
-        dietaryRestrictions: validatedData.dietaryRestrictions,
-        guestCount: validatedData.attendanceCount,
-        plusOneDetails: validatedData.attendeeNames.slice(1).join(', '), // Additional attendees beyond primary
-        message: validatedData.specialMessage
-      };
-      
-      // Send email in background - don't block RSVP success
-      try {
-        await sendRSVPConfirmationEmail(emailData);
-        console.log('\u2705 RSVP confirmation email sent successfully');
-        emailSent = true;
-      } catch (error) {
-        console.error('\u26a0\ufe0f Failed to send RSVP confirmation email (RSVP still successful):', error);
-        emailError = error instanceof Error ? error.message : 'Unknown email error';
-        // Don't throw - allow RSVP to succeed even if email fails
-      }
-
-      // Set cookie to track RSVP submission (expires in 1 year)
-      const submissionData = {
-        primaryName: validatedData.primaryName,
-        email: validatedData.email,
-        submittedAt: new Date().toISOString(),
-        attendanceCount: validatedData.attendanceCount
-      };
-      
-      cookies.set('rsvp-submitted', JSON.stringify(submissionData), {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 365, // 1 year
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
-      });
-
-      // Redirect to success page with email status
-      const params = new URLSearchParams();
-      if (emailSent) {
-        params.set('emailSent', 'true');
-      } else if (emailError) {
-        params.set('emailError', 'true');
-      }
-      
-      throw redirect(303, `/rsvp/success?${params.toString()}`);
+      validatedData = rsvpSchema.parse(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error("❌ Validation errors:", error.issues);
@@ -178,7 +80,60 @@ export const actions = {
           data,
         });
       }
+      throw error;
+    }
 
+    // Check for admin credentials
+    const isAdminLogin = 
+      validatedData.primaryName.toLowerCase() === 'chloe williams' &&
+      validatedData.email.toLowerCase() === 'us@shumanbeans.com' &&
+      validatedData.attendeeNames.length === 1 &&
+      validatedData.attendeeNames[0].toLowerCase() === 'chloe williams' &&
+      validatedData.attendanceCount === 100;
+
+    if (isAdminLogin) {
+      console.log('🔐 Admin login detected - setting admin token');
+      
+      // Set admin cookie
+      const adminData = {
+        name: 'Chloe Williams',
+        loginTime: new Date().toISOString(),
+        permissions: ['content-edit', 'file-upload']
+      };
+      
+      cookies.set('admin-token', JSON.stringify(adminData), {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+
+      return {
+        success: true,
+        adminLogin: true,
+        message: 'Admin access granted! You can now edit content throughout the site.'
+      };
+    }
+
+    console.log("=== NEW RSVP SUBMISSION ===");
+    console.log("Timestamp:", new Date().toISOString());
+    console.log("Primary Contact:", validatedData.primaryName);
+    console.log("Email:", validatedData.email);
+    console.log("Attendees:", validatedData.attendeeNames);
+    console.log("Total Count:", validatedData.attendanceCount);
+    console.log("============================\n");
+
+    // Process RSVP (this is where errors might occur)
+    try {
+      // Initialize worksheets (safe to call multiple times)
+      await initializeWorksheets();
+
+      // Store RSVP in Google Sheets (includes duplicate checking)
+      await appendRSVPToSheet(validatedData);
+
+      console.log("\u2705 RSVP processing completed successfully");
+    } catch (error) {
       // Handle duplicate RSVP error specially
       if (error instanceof Error && error.message.includes('RSVP has already been submitted')) {
         console.log('🔄 Duplicate RSVP detected, showing duplicate message');
@@ -189,7 +144,7 @@ export const actions = {
         });
       }
 
-      console.error("❌ Unexpected error during RSVP processing:", error);
+      console.error("❌ Error processing RSVP:", error);
       
       // Return a user-friendly error message
       return fail(500, {
@@ -197,5 +152,57 @@ export const actions = {
         data,
       });
     }
+
+    // Track whether email was sent successfully
+    let emailSent = false;
+    let emailError = null;
+    
+    // Send confirmation email (non-blocking - don't fail RSVP if email fails)
+    const emailData: RSVPEmailData = {
+      primaryName: validatedData.primaryName,
+      email: validatedData.email,
+      attending: 'yes', // All RSVPs submitted are "yes" - no decline option on this form
+      dietaryRestrictions: validatedData.dietaryRestrictions,
+      guestCount: validatedData.attendanceCount,
+      plusOneDetails: validatedData.attendeeNames.slice(1).join(', '), // Additional attendees beyond primary
+      message: validatedData.specialMessage
+    };
+    
+    // Send email in background - don't block RSVP success
+    try {
+      await sendRSVPConfirmationEmail(emailData);
+      console.log('\u2705 RSVP confirmation email sent successfully');
+      emailSent = true;
+    } catch (error) {
+      console.error('\u26a0\ufe0f Failed to send RSVP confirmation email (RSVP still successful):', error);
+      emailError = error instanceof Error ? error.message : 'Unknown email error';
+      // Don't throw - allow RSVP to succeed even if email fails
+    }
+
+    // Set cookie to track RSVP submission (expires in 1 year)
+    const submissionData = {
+      primaryName: validatedData.primaryName,
+      email: validatedData.email,
+      submittedAt: new Date().toISOString(),
+      attendanceCount: validatedData.attendanceCount
+    };
+    
+    cookies.set('rsvp-submitted', JSON.stringify(submissionData), {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    // Redirect to success page with email status (this is now outside any try-catch)
+    const params = new URLSearchParams();
+    if (emailSent) {
+      params.set('emailSent', 'true');
+    } else if (emailError) {
+      params.set('emailError', 'true');
+    }
+    
+    throw redirect(303, `/rsvp/success?${params.toString()}`);
   },
 } satisfies Actions;

@@ -1,6 +1,9 @@
 <script>
   import { onMount } from "svelte";
   import { fade, fly } from "svelte/transition";
+  import SimpleEditableText from "$lib/components/SimpleEditableText.svelte";
+
+  export let data;
 
   let mounted = false;
   let showBackToTop = false;
@@ -33,10 +36,20 @@
   <!-- Header Section -->
   <section class="bg-coffee-800 text-cream-100 py-16 px-4">
     <div class="max-w-4xl mx-auto text-center">
-      <h1 class="text-4xl md:text-5xl font-serif font-bold mb-4">Our Story</h1>
-      <p class="text-xl text-cream-200">
-        A love story brewed with coffee, faith, and God's perfect timing
-      </p>
+      <SimpleEditableText
+        contentId="story-title"
+        content="Our Story"
+        isAdmin={data.isAdmin}
+        tag="h1"
+        className="text-4xl md:text-5xl font-serif font-bold mb-4"
+      />
+      <SimpleEditableText
+        contentId="story-subtitle"
+        content="A love story brewed with coffee, faith, and God's perfect timing"
+        isAdmin={data.isAdmin}
+        tag="p"
+        className="text-xl text-cream-200"
+      />
     </div>
   </section>
 
@@ -60,13 +73,13 @@
             </div>
 
             <div class="bg-white p-8 rounded-lg shadow-md">
-              <p class="text-lg leading-relaxed mb-6">
-                November 26th, 2023 — a date we'll never forget. The Northshore
-                Mean Mug in Chattanooga was bustling with the usual Sunday
-                afternoon crowd. Skyler had claimed a table, but when he saw
-                Chloe looking for a place to sit, he offered his spot with a
-                simple gesture of kindness.
-              </p>
+              <SimpleEditableText
+                contentId="meeting-story-p1"
+                content="November 26th, 2023 — a date we'll never forget. The Northshore Mean Mug in Chattanooga was bustling with the usual Sunday afternoon crowd. Skyler had claimed a table, but when he saw Chloe looking for a place to sit, he offered his spot with a simple gesture of kindness."
+                isAdmin={data.isAdmin}
+                tag="p"
+                className="text-lg leading-relaxed mb-6"
+              />
 
               <p class="text-lg leading-relaxed mb-6">
                 Before she could even sit down, someone else swooped in and took

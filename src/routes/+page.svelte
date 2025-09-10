@@ -1,7 +1,7 @@
 <script>
   import { fade, fly } from "svelte/transition";
   import { onMount } from "svelte";
-  import EditableContent from "$lib/components/EditableContent.svelte";
+  import SimpleEditableText from "$lib/components/SimpleEditableText.svelte";
 
   export let data;
   
@@ -111,7 +111,7 @@
 <!-- Covenant Section -->
 <section class="bg-cream-100 py-12 md:py-16 px-4 md:px-6">
   <div class="max-w-4xl mx-auto text-center">
-    <EditableContent
+    <SimpleEditableText
       contentId="covenant-title"
       content="A Covenant Before God"
       isAdmin={data.isAdmin}
@@ -120,7 +120,7 @@
     />
 
     <div class="prose prose-lg max-w-none text-coffee-900">
-      <EditableContent
+      <SimpleEditableText
         contentId="covenant-text"
         content="We joyfully invite you to witness before God our covenant of marriage. As believers in the Gospel, we see marriage as a reflection of Christ's love for His Church. We gather together not just as friends and family, but as a community united in faith, to celebrate God's grace and faithfulness in bringing us together."
         isAdmin={data.isAdmin}
