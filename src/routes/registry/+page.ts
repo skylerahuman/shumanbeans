@@ -14,12 +14,8 @@ function camelToTitle(str: string): string {
 
 // Extract item data from filename
 function parseItemFromFilename(filename: string) {
-  // Check if this is an uploaded item
-  const isUploaded = filename.startsWith('uploaded/');
-  const actualFilename = isUploaded ? filename.replace('uploaded/', '') : filename;
-  
   // Remove .jpg extension
-  const nameAndPrice = actualFilename.replace('.jpg', '');
+  const nameAndPrice = filename.replace('.jpg', '');
   
   // Split on the last dash to separate name from price
   const lastDashIndex = nameAndPrice.lastIndexOf('-');
@@ -42,17 +38,15 @@ function parseItemFromFilename(filename: string) {
   // Format price
   const price = `$${parseFloat(rawPrice).toFixed(2)}`;
   
-  // Determine image path based on source
-  const imagePath = isUploaded 
-    ? `/images/registry/${actualFilename}`
-    : `/images/AmazonRegistry/${actualFilename}`;
+  // All items are now in the same directory
+  const imagePath = `/images/AmazonRegistry/${filename}`;
   
   return {
     title,
     price,
     image: imagePath,
     url: 'https://www.amazon.com/wedding/share/shumanbeans',
-    source: isUploaded ? 'Custom' : 'Amazon'
+    source: 'Registry'
   };
 }
 

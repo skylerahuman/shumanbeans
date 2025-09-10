@@ -210,6 +210,35 @@
         </div>
       </div>
     {:else}
+      <!-- Error Messages -->
+      {#if form?.isDuplicate}
+        <div class="mb-8" in:fade={{ duration: 600 }}>
+          <div class="bg-amber-50 border-2 border-amber-300 rounded-xl p-6">
+            <div class="flex items-center mb-4">
+              <div class="text-amber-500 text-2xl mr-3">⚠️</div>
+              <h2 class="text-xl font-semibold text-amber-800">RSVP Already Submitted</h2>
+            </div>
+            <p class="text-amber-700 mb-4">{form.message}</p>
+            <div class="text-sm text-amber-600">
+              <p>If you need to make changes, please contact us directly:</p>
+              <p class="font-medium mt-1">📧 <a href="mailto:us@shumanbeans.com" class="underline hover:text-amber-800">us@shumanbeans.com</a></p>
+              <p class="font-medium">📱 Text Skyler at <a href="tel:423-370-6198" class="underline hover:text-amber-800">423-370-6198</a></p>
+            </div>
+          </div>
+        </div>
+      {:else if form?.message && !form?.success}
+        <div class="mb-8" in:fade={{ duration: 600 }}>
+          <div class="bg-red-50 border-2 border-red-300 rounded-xl p-6">
+            <div class="flex items-center mb-4">
+              <div class="text-red-500 text-2xl mr-3">❌</div>
+              <h2 class="text-xl font-semibold text-red-800">Submission Error</h2>
+            </div>
+            <p class="text-red-700 mb-4">{form.message}</p>
+            <p class="text-sm text-red-600">Please try again, or contact us if the problem persists.</p>
+          </div>
+        </div>
+      {/if}
+      
       <!-- RSVP Form -->
       {#if mounted}
         <div in:fly={{ y: 30, duration: 600, delay: 200 }}>

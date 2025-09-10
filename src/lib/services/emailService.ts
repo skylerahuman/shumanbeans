@@ -21,19 +21,44 @@ export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promis
 
   const htmlContent = generateRSVPEmailHTML(rsvpData, isAttending);
 
-  const { data, error } = await resend.emails.send({
-    from: `Skyler & Hannah <${FROM_EMAIL}>`,
+  // Add timeout to email sending (10 seconds max)
+  const emailPromise = resend.emails.send({
+    from: `Skyler & Chloe <${FROM_EMAIL}>`,
     to: [rsvpData.email],
     subject,
     html: htmlContent,
   });
-
-  if (error) {
+  
+  const timeoutPromise = new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('Email send timeout after 10 seconds')), 10000)
+  );
+  
+  try {
+    const { data, error } = await Promise.race([emailPromise, timeoutPromise]) as any;
+    
+    if (error) {
+      console.error('Resend API error:', error);
+      throw new Error(`Resend API error: ${error.message || JSON.stringify(error)}`);
+    }
+    
+    console.log('RSVP confirmation email sent successfully:', data?.id);
+    
+  } catch (error) {
     console.error('Failed to send RSVP confirmation email:', error);
-    throw new Error(`Failed to send confirmation email: ${error.message}`);
+    
+    // Provide more detailed error information
+    if (error instanceof Error) {
+      if (error.message.includes('domain is not verified')) {
+        throw new Error(`Email domain not verified. Please verify ${FROM_EMAIL.split('@')[1]} in Resend dashboard.`);
+      }
+      if (error.message.includes('timeout')) {
+        throw new Error('Email service timeout - please try again later.');
+      }
+      throw new Error(`Email service error: ${error.message}`);
+    }
+    
+    throw new Error('Unknown email service error');
   }
-
-  console.log('RSVP confirmation email sent successfully:', data?.id);
 }
 
 function generateRSVPEmailHTML(rsvpData: RSVPEmailData, isAttending: boolean): string {
@@ -113,7 +138,7 @@ function generateRSVPEmailHTML(rsvpData: RSVPEmailData, isAttending: boolean): s
     <body style="margin: 0; padding: 20px; background-color: #f5f5f5;">
       <div style="${baseStyles}">
         <div style="${headerStyles}">
-          <h1 style="margin: 0; font-size: 28px;">Skyler & Hannah</h1>
+          <h1 style="margin: 0; font-size: 28px;">Skyler & Chloe</h1>
           <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">Thank you for your RSVP!</p>
         </div>
         
@@ -130,7 +155,7 @@ function generateRSVPEmailHTML(rsvpData: RSVPEmailData, isAttending: boolean): s
           
           <div style="margin: 30px 0; text-align: center; border-top: 1px solid #dee2e6; padding-top: 20px;">
             <p>With love and excitement,</p>
-            <p style="font-size: 20px; color: #667eea; margin: 10px 0;"><strong>Skyler & Hannah</strong></p>
+            <p style="font-size: 20px; color: #667eea; margin: 10px 0;"><strong>Skyler & Chloe</strong></p>
           </div>
           
           <div style="margin: 20px 0; padding: 15px; background: #e9ecef; border-radius: 5px; font-size: 14px; color: #6c757d;">

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { appendRSVPToSheet, initializeWorksheets } from '$lib/services/googleSheets';
 import { sendRSVPConfirmationEmail, type RSVPEmailData } from '$lib/services/emailService';
@@ -118,7 +118,12 @@ export const actions = {
       // Store RSVP in Google Sheets (includes duplicate checking)
       await appendRSVPToSheet(validatedData);
 
-      // Send confirmation email
+      console.log("\u2705 RSVP processing completed successfully");
+      // Track whether email was sent successfully
+      let emailSent = false;
+      let emailError = null;
+      
+      // Send confirmation email (non-blocking - don't fail RSVP if email fails)
       const emailData: RSVPEmailData = {
         primaryName: validatedData.primaryName,
         email: validatedData.email,
@@ -128,9 +133,17 @@ export const actions = {
         plusOneDetails: validatedData.attendeeNames.slice(1).join(', '), // Additional attendees beyond primary
         message: validatedData.specialMessage
       };
-      await sendRSVPConfirmationEmail(emailData);
-
-      console.log("✅ RSVP processing completed successfully");
+      
+      // Send email in background - don't block RSVP success
+      try {
+        await sendRSVPConfirmationEmail(emailData);
+        console.log('\u2705 RSVP confirmation email sent successfully');
+        emailSent = true;
+      } catch (error) {
+        console.error('\u26a0\ufe0f Failed to send RSVP confirmation email (RSVP still successful):', error);
+        emailError = error instanceof Error ? error.message : 'Unknown email error';
+        // Don't throw - allow RSVP to succeed even if email fails
+      }
 
       // Set cookie to track RSVP submission (expires in 1 year)
       const submissionData = {
@@ -148,15 +161,30 @@ export const actions = {
         sameSite: 'strict'
       });
 
-      return {
-        success: true,
-        data: validatedData,
-      };
+      // Redirect to success page with email status
+      const params = new URLSearchParams();
+      if (emailSent) {
+        params.set('emailSent', 'true');
+      } else if (emailError) {
+        params.set('emailError', 'true');
+      }
+      
+      throw redirect(303, `/rsvp/success?${params.toString()}`);
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error("❌ Validation errors:", error.issues);
         return fail(400, {
           errors: error.issues,
+          data,
+        });
+      }
+
+      // Handle duplicate RSVP error specially
+      if (error instanceof Error && error.message.includes('RSVP has already been submitted')) {
+        console.log('🔄 Duplicate RSVP detected, showing duplicate message');
+        return fail(409, {
+          message: error.message,
+          isDuplicate: true,
           data,
         });
       }
