@@ -49,7 +49,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     const fileName = `${cleanProductName}-${price}.jpg`;
     
     // Ensure static/images directory exists
-    const staticDir = path.join(process.cwd(), 'static', 'images', 'registry');
+    const staticDir = path.join(process.cwd(), 'static', 'images', 'AmazonRegistry');
     if (!existsSync(staticDir)) {
       await mkdir(staticDir, { recursive: true });
     }

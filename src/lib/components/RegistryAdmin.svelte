@@ -119,6 +119,8 @@
     
     <div
       class="border-2 border-dashed border-red-300 rounded-lg p-8 text-center transition-colors {dragActive ? 'border-red-500 bg-red-100' : 'hover:border-red-400'}"
+      role="region"
+      aria-label="File upload drop zone"
       on:dragover={handleDragOver}
       on:dragleave={handleDragLeave}
       on:drop={handleDrop}
@@ -156,7 +158,7 @@
     </div>
     
     {#if uploadMessage}
-      <div class="upload-message mt-4 p-3 rounded text-sm font-medium">
+      <div class="upload-message mt-4 p-3 rounded text-sm font-medium {uploadMessage.includes('Successfully') ? 'success' : uploadMessage.includes('Failed') ? 'error' : 'info'}">
         {uploadMessage}
       </div>
     {/if}

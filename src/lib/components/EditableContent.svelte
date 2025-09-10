@@ -1,4 +1,6 @@
 <script>
+  import { onMount } from 'svelte';
+  
   export let contentId = '';
   export let content = '';
   export let isAdmin = false;
@@ -8,12 +10,30 @@
   let isEditing = false;
   let editedContent = content;
   let originalContent = content;
+  let currentContent = content;
+  
+  onMount(async () => {
+    if (isAdmin && contentId) {
+      // Try to load content from server
+      try {
+        const response = await fetch(`/admin/content/get/${contentId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.content) {
+            currentContent = data.content.content;
+          }
+        }
+      } catch (error) {
+        console.log('Could not load stored content, using default:', error);
+      }
+    }
+  });
   
   function startEdit() {
     if (!isAdmin) return;
     isEditing = true;
-    editedContent = content;
-    originalContent = content;
+    editedContent = currentContent;
+    originalContent = currentContent;
   }
   
   function cancelEdit() {
@@ -35,16 +55,18 @@
       });
       
       if (response.ok) {
-        content = editedContent;
+        currentContent = editedContent;
         isEditing = false;
         // Show success feedback
         showFeedback('Content updated!', 'success');
+        console.log(`✅ Updated content for ${contentId}`);
       } else {
-        throw new Error('Failed to update content');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to update content');
       }
     } catch (error) {
       console.error('Error updating content:', error);
-      showFeedback('Failed to update content', 'error');
+      showFeedback(`Failed to update content: ${error.message}`, 'error');
       cancelEdit();
     }
   }
@@ -79,7 +101,7 @@
       on:keydown={handleKeydown}
       class="w-full min-h-[100px] p-3 border-2 border-blue-500 rounded-lg bg-white text-black resize-y font-inherit"
       placeholder="Enter your content here..."
-      autofocus
+      {/* autofocus */}
     ></textarea>
     <div class="flex gap-2 mt-3">
       <button
@@ -112,7 +134,7 @@
       tabindex={isAdmin ? 0 : undefined}
       role={isAdmin ? 'button' : undefined}
     >
-      {@html content}
+      {@html currentContent}
     </svelte:element>
     {#if isAdmin}
       <button

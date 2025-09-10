@@ -2,6 +2,7 @@
   import "../app.css";
   import Nav from "$lib/components/Nav.svelte";
   import AdminBar from "$lib/components/AdminBar.svelte";
+  import EditableContent from "$lib/components/EditableContent.svelte";
 
   export let data;
 
@@ -32,15 +33,22 @@
       </div>
       <div class="flex items-center justify-center space-x-2">
         <span class="text-2xl" role="img" aria-label="coffee">☕</span>
-        <p class="text-lg font-serif">
-          Two hearts, one journey, endless coffee
-        </p>
+        <EditableContent
+          contentId="footer-tagline"
+          content="Two hearts, one journey, endless coffee"
+          isAdmin={data.isAdmin}
+          tag="p"
+          className="text-lg font-serif"
+        />
         <span class="text-2xl" role="img" aria-label="heart">💕</span>
       </div>
-      <p class="text-sm text-cream-300 italic">
-        "Therefore what God has joined together, let no one separate." - Mark
-        10:9
-      </p>
+      <EditableContent
+        contentId="footer-verse"
+        content="&quot;Therefore what God has joined together, let no one separate.&quot; - Mark 10:9"
+        isAdmin={data.isAdmin}
+        tag="p"
+        className="text-sm text-cream-300 italic"
+      />
       <p class="text-cream-400 text-sm">
         © 2025 The Shumanbeans | Made with love for our special day
       </p>

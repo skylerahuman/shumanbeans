@@ -2,7 +2,7 @@
   import { page } from "$app/stores";
 
   export let hasSubmittedRSVP = false;
-  export let isAdmin = false;
+  export const isAdmin = false;
 
   let innerWidth = 0;
   $: isMobile = innerWidth < 768;

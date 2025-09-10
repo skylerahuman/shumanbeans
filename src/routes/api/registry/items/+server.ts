@@ -8,30 +8,19 @@ export const GET: RequestHandler = async () => {
   try {
     const registryItems: string[] = [];
     
-    // Static registry items directory (original items)
-    const staticDir = path.join(process.cwd(), 'static', 'images', 'AmazonRegistry');
-    if (existsSync(staticDir)) {
+    // All registry items directory (original + uploaded)
+    const registryDir = path.join(process.cwd(), 'static', 'images', 'AmazonRegistry');
+    if (existsSync(registryDir)) {
       try {
-        const staticFiles = await readdir(staticDir);
-        const jpgFiles = staticFiles.filter(file => file.toLowerCase().endsWith('.jpg'));
+        const allFiles = await readdir(registryDir);
+        const jpgFiles = allFiles.filter(file => file.toLowerCase().endsWith('.jpg'));
         registryItems.push(...jpgFiles);
+        console.log(`📋 Found ${jpgFiles.length} registry items`);
       } catch (error) {
-        console.warn('Could not read static registry directory:', error);
+        console.warn('Could not read registry directory:', error);
       }
-    }
-    
-    // Uploaded registry items directory (admin uploads)
-    const uploadDir = path.join(process.cwd(), 'static', 'images', 'registry');
-    if (existsSync(uploadDir)) {
-      try {
-        const uploadedFiles = await readdir(uploadDir);
-        const jpgFiles = uploadedFiles.filter(file => file.toLowerCase().endsWith('.jpg'));
-        // Add uploaded files with different path prefix
-        const uploadedItems = jpgFiles.map(file => `uploaded/${file}`);
-        registryItems.push(...uploadedItems);
-      } catch (error) {
-        console.warn('Could not read uploaded registry directory:', error);
-      }
+    } else {
+      console.warn('Registry directory does not exist:', registryDir);
     }
     
     // Remove duplicates and sort
