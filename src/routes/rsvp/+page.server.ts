@@ -273,12 +273,32 @@ export const actions = {
     
     try {
       console.log('📧 Attempting email send with production-safe strategy...');
-      emailResult = await sendEmailWithFallback(emailData);
+      
+      // Add a shorter timeout for production to prevent hanging
+      const emailPromise = sendEmailWithFallback(emailData);
+      const shortTimeoutPromise = new Promise<{ success: boolean; error?: string }>((resolve) => {
+        setTimeout(() => {
+          console.log('⏰ Email send timeout reached, proceeding with RSVP completion');
+          resolve({ success: false, error: 'Email send timeout - will retry in background' });
+        }, 5000); // 5 second timeout for production
+      });
+      
+      emailResult = await Promise.race([emailPromise, shortTimeoutPromise]);
       
       if (emailResult.success) {
         console.log('✅ Email confirmation sent successfully');
       } else {
         console.log('⚠️ Email confirmation failed but RSVP was successful:', emailResult.error);
+        // Schedule background retry
+        console.log('🔄 Scheduling background email retry...');
+        Promise.resolve().then(async () => {
+          try {
+            await sendEmailAsync(emailData);
+            console.log('✅ Background email retry succeeded');
+          } catch (error) {
+            console.error('❌ Background email retry failed:', error);
+          }
+        });
       }
     } catch (error) {
       console.error('❌ Email sending encountered unexpected error:', error);
@@ -286,6 +306,17 @@ export const actions = {
         success: false, 
         error: error instanceof Error ? error.message : String(error) 
       };
+      
+      // Still try background send
+      console.log('🔄 Scheduling background email retry after error...');
+      Promise.resolve().then(async () => {
+        try {
+          await sendEmailAsync(emailData);
+          console.log('✅ Background email retry after error succeeded');
+        } catch (retryError) {
+          console.error('❌ Background email retry after error failed:', retryError);
+        }
+      });
     }
 
     // Set cookie to track RSVP submission (expires in 1 year)

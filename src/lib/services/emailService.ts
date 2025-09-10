@@ -114,17 +114,34 @@ export async function sendRSVPConfirmationEmail(rsvpData: RSVPEmailData): Promis
       }
     };
 
-    console.log('🔄 Calling Resend API...', {
+    console.log('🔄 About to call Resend API...', {
       payloadKeys: Object.keys(emailPayload),
+      fromEmail: emailPayload.from,
+      toEmail: emailPayload.to[0],
+      subjectLength: emailPayload.subject.length,
+      htmlLength: emailPayload.html.length,
+      textLength: emailPayload.text.length,
       timestamp: new Date().toISOString()
     });
 
-    const response = await resend.emails.send(emailPayload);
+    console.log('🌐 Making Resend API call now...');
+    
+    // Add timeout to the Resend API call itself
+    const apiCallPromise = resend.emails.send(emailPayload);
+    const apiTimeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        console.error('⏰ Resend API call timeout after 15 seconds');
+        reject(new Error('Resend API call timeout'));
+      }, 15000);
+    });
 
-    console.log('📨 Resend API response received:', {
+    const response = await Promise.race([apiCallPromise, apiTimeoutPromise]);
+
+    console.log('📨 Resend API response received successfully:', {
       hasData: !!response.data,
       hasError: !!response.error,
       dataKeys: response.data ? Object.keys(response.data) : [],
+      responseType: typeof response,
       timestamp: new Date().toISOString()
     });
 
