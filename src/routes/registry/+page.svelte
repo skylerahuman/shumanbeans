@@ -1,20 +1,12 @@
 <script>
   import { onMount } from "svelte";
-  import { fade, fly } from "svelte/transition";
-  import ProductCard from "$lib/components/ProductCard.svelte";
-  import RegistryAdmin from "$lib/components/RegistryAdmin.svelte";
-  import { page } from '$app/stores';
-
-  export let data;
+  import { fade } from "svelte/transition";
 
   let mounted = false;
 
   onMount(() => {
     mounted = true;
   });
-
-  $: amazonProducts = data.amazonProducts || [];
-  $: isAdmin = $page.data.isAdmin || false;
 </script>
 
 <svelte:head>
@@ -46,18 +38,14 @@
         >
           <span>🛒</span> Amazon Registry
         </a>
-        <button
-          disabled
-          class="bg-coffee-600 text-white px-6 py-3 rounded-md font-medium cursor-not-allowed opacity-75 flex items-center gap-2"
+        <a
+          href="https://www.crateandbarrel.com/gift-registry/skyler-shuman-and-chloe-williams/r7393315"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md font-medium transition-colors duration-300 flex items-center gap-2"
         >
-          <span>🏠</span> Crate & Barrel (Coming Soon)
-        </button>
-        <button
-          disabled
-          class="bg-coffee-600 text-white px-6 py-3 rounded-md font-medium cursor-not-allowed opacity-75 flex items-center gap-2"
-        >
-          <span>🔨</span> Home Depot (Coming Soon)
-        </button>
+          <span>🏠</span> Crate & Barrel Registry
+        </a>
       </div>
     </div>
   </section>
@@ -75,74 +63,6 @@
     </div>
   </section>
 
-  <!-- Products Grid -->
-  <section class="pb-16 px-4">
-    <div class="max-w-7xl mx-auto">
-      <!-- Registry Admin Panel -->
-      <RegistryAdmin {isAdmin} />
-      
-      <!-- Amazon Products Section -->
-      <div class="mb-12">
-          {#if mounted}
-            <div in:fly={{ y: 30, duration: 600, delay: 200 }}>
-              <h2
-                class="text-2xl md:text-3xl font-serif font-semibold text-coffee-800 mb-2 text-center"
-              >
-                From Our Amazon Registry
-              </h2>
-              <p class="text-coffee-600 text-center mb-8">
-                Kitchen essentials, home goods, and everything in between
-              </p>
-            </div>
-          {/if}
-          
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {#each amazonProducts as product, index}
-            <ProductCard
-              title={product.title}
-              image={product.image}
-              price={product.price}
-              url={product.url}
-              source={product.source}
-              {index}
-            />
-          {/each}
-        </div>
-      </div>
-
-      <!-- Coming Soon Sections -->
-      {#if mounted}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16" in:fade={{ duration: 600, delay: 800 }}>
-          <div class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200">
-            <div class="text-4xl mb-4">🏠</div>
-            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">Crate & Barrel</h3>
-            <p class="text-coffee-600 text-sm mb-4">
-              Elegant home decor and dining essentials
-            </p>
-            <p class="text-xs text-coffee-500">Coming Soon</p>
-          </div>
-          
-          <div class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200">
-            <div class="text-4xl mb-4">🔨</div>
-            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">Home Depot</h3>
-            <p class="text-coffee-600 text-sm mb-4">
-              Tools and home improvement essentials
-            </p>
-            <p class="text-xs text-coffee-500">Coming Soon</p>
-          </div>
-          
-          <div class="text-center p-6 bg-white rounded-lg shadow-md border border-coffee-200">
-            <div class="text-4xl mb-4">🎯</div>
-            <h3 class="text-xl font-serif font-semibold text-coffee-800 mb-2">Target</h3>
-            <p class="text-coffee-600 text-sm mb-4">
-              Everyday essentials and home basics
-            </p>
-            <p class="text-xs text-coffee-500">Coming Soon</p>
-          </div>
-        </div>
-      {/if}
-    </div>
-  </section>
 
   <!-- Thank You Section -->
   <section class="bg-coffee-100 py-12 px-4">
