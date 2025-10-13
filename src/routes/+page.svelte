@@ -54,19 +54,11 @@
         Chloe & Skyler
       </h1>
 
-      <blockquote
-        class="text-lg md:text-xl italic mb-4 max-w-2xl"
-        in:fade={{ duration: 800, delay: 600 }}
-      >
-        "In vain have I struggled. It will not do. My feelings will not be
-        repressed."
-      </blockquote>
-
       <p
         class="text-base md:text-lg mb-2"
         in:fly={{ y: 20, duration: 600, delay: 1000 }}
       >
-        We joyfully invite you to witness our covenant — Mr. Darcy
+        We joyfully invite you to witness our covenant
       </p>
 
       <p
@@ -88,12 +80,8 @@
       <h1 class="text-4xl md:text-6xl font-serif font-bold mb-4">
         Chloe & Skyler
       </h1>
-      <blockquote class="text-lg md:text-xl italic mb-4 max-w-2xl">
-        "In vain have I struggled. It will not do. My feelings will not be
-        repressed."
-      </blockquote>
       <p class="text-base md:text-lg mb-2">
-        We joyfully invite you to witness our covenant — Mr. Darcy
+        We joyfully invite you to witness our covenant
       </p>
       <p class="text-base md:text-lg mb-8 font-medium">
         November 22, 2025 • 2:30 PM
